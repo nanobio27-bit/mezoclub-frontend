@@ -3,6 +3,7 @@
 @import "@fontsource/inter/500.css";
 @import "@fontsource/inter/600.css";
 @import "@fontsource/inter/700.css";
+@import "@fontsource/inter/800.css";
 
 @theme {
   --color-bg: #0A0A1A;
@@ -16,6 +17,7 @@
   --color-muted: #888888;
   --color-error: #EF4444;
   --color-border: #2A2A3E;
+  --color-teal: #00D4AA;
   --font-sans: "Inter", system-ui, sans-serif;
 }
 
@@ -27,18 +29,108 @@
 
 body {
   font-family: var(--font-sans);
-  background-color: var(--color-bg);
+  background: radial-gradient(ellipse at center, #0A0A1A 0%, #050510 100%);
   color: var(--color-text);
   min-height: 100vh;
 }
 
-::-webkit-scrollbar {
-  width: 6px;
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+/* Glassmorphism card base */
+.glass-card {
+  background: rgba(26, 26, 46, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
 }
-::-webkit-scrollbar-track {
-  background: var(--color-bg);
+.glass-card:hover {
+  box-shadow: 0 8px 32px rgba(184, 134, 11, 0.15);
 }
-::-webkit-scrollbar-thumb {
-  background: var(--color-border);
-  border-radius: 3px;
+
+/* Inputs */
+.input-glass {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  padding: 10px 16px;
+  color: var(--color-text);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  width: 100%;
+}
+.input-glass::placeholder { color: var(--color-muted); }
+.input-glass:focus {
+  border-color: var(--color-gold);
+  box-shadow: 0 0 0 3px rgba(184,134,11,0.1);
+}
+
+/* Primary button */
+.btn-primary {
+  background: linear-gradient(135deg, #B8860B, #D4A017);
+  color: #000;
+  font-weight: 600;
+  padding: 10px 24px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(184,134,11,0.4);
+}
+.btn-primary:active { transform: translateY(0); }
+
+/* Secondary button */
+.btn-secondary {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: var(--color-text);
+  font-weight: 500;
+  padding: 10px 24px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-secondary:hover { background: rgba(255,255,255,0.1); }
+
+/* Particles */
+.particles-container {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+.particle {
+  position: absolute;
+  background: rgba(255,255,255,0.15);
+  border-radius: 50%;
+  animation: float-particle linear infinite;
+}
+
+@keyframes float-particle {
+  0% { transform: translateY(100vh) translateX(0); opacity: 0; }
+  10% { opacity: 0.2; }
+  90% { opacity: 0.15; }
+  100% { transform: translateY(-10vh) translateX(30px); opacity: 0; }
+}
+
+/* Table styles */
+.table-header {
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: rgba(255,255,255,0.4);
+  font-weight: 500;
+}
+.table-row-hover:hover {
+  background: rgba(255,255,255,0.03);
 }

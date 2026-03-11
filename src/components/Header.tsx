@@ -19,14 +19,22 @@ export default function Header({ title, collapsed }: HeaderProps) {
 
   return (
     <header
-      className="h-16 bg-card border-b border-border flex items-center justify-between px-6 fixed top-0 right-0 z-40 transition-all"
-      style={{ left: collapsed ? 64 : 260 }}
+      className="border-b border-border flex items-center justify-between fixed top-0 right-0 z-40 transition-all"
+      style={{
+        height: 64,
+        left: collapsed ? 72 : 260,
+        background: 'rgba(10, 10, 26, 0.8)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        paddingLeft: 24,
+        paddingRight: 32,
+      }}
     >
-      <h2 className="text-lg font-semibold text-text">{title}</h2>
+      <h2 style={{ fontSize: 20, fontWeight: 600 }} className="text-text truncate mr-4">{title}</h2>
 
-      <div className="flex items-center gap-5">
+      <div className="flex items-center gap-5 shrink-0">
         {/* GinCoin balance */}
-        <div className="flex items-center gap-1.5 text-gold">
+        <div className="flex items-center gap-1.5 text-gold whitespace-nowrap">
           <Coins size={18} />
           <span className="text-sm font-medium">0</span>
         </div>
@@ -40,9 +48,9 @@ export default function Header({ title, collapsed }: HeaderProps) {
         </button>
 
         {/* User info */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 whitespace-nowrap">
           <span className="text-sm text-muted hidden sm:block">{user?.name || 'User'}</span>
-          <div className="w-8 h-8 rounded-full bg-gold/20 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-full bg-gold/20 flex items-center justify-center shrink-0">
             <User size={16} className="text-gold" />
           </div>
         </div>

@@ -56,7 +56,6 @@ export default function ClientsPage() {
 
   const totalPages = Math.max(1, Math.ceil(total / limit));
 
-  void t;
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
@@ -68,7 +67,7 @@ export default function ClientsPage() {
           className="flex items-center gap-2 bg-gold hover:bg-gold-hover text-bg font-medium px-4 py-2 rounded-lg transition-colors"
         >
           <Plus size={18} />
-          Добавить клиента
+          {t('clients_page.add_client')}
         </button>
       </div>
 
@@ -77,7 +76,7 @@ export default function ClientsPage() {
         <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
         <input
           type="text"
-          placeholder="Поиск по имени, email, телефону..."
+          placeholder={t('clients_page.search_placeholder')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full bg-card border border-border rounded-lg pl-10 pr-4 py-2.5 text-text placeholder:text-muted focus:outline-none focus:border-gold transition-colors"
@@ -90,26 +89,26 @@ export default function ClientsPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="text-muted border-b border-border">
-                <th className="text-left py-3 px-4">Имя</th>
+                <th className="text-left py-3 px-4">{t('clients_page.name')}</th>
                 <th className="text-left py-3 px-4">Email</th>
-                <th className="text-left py-3 px-4">Телефон</th>
-                <th className="text-left py-3 px-4">Компания</th>
-                <th className="text-left py-3 px-4">Статус</th>
-                <th className="text-left py-3 px-4">Дата создания</th>
+                <th className="text-left py-3 px-4">{t('clients_page.phone')}</th>
+                <th className="text-left py-3 px-4">{t('clients_page.company')}</th>
+                <th className="text-left py-3 px-4">{t('clients_page.status')}</th>
+                <th className="text-left py-3 px-4">{t('clients_page.created_at')}</th>
               </tr>
             </thead>
             <tbody>
               {loading && (
                 <tr>
                   <td colSpan={6} className="text-center py-8 text-muted">
-                    Загрузка...
+                    {t('common.loading')}
                   </td>
                 </tr>
               )}
               {!loading && clients.length === 0 && (
                 <tr>
                   <td colSpan={6} className="text-center py-8 text-muted">
-                    Клиенты не найдены
+                    {t('clients_page.not_found')}
                   </td>
                 </tr>
               )}
@@ -145,7 +144,7 @@ export default function ClientsPage() {
         {/* Pagination */}
         <div className="flex items-center justify-between px-4 py-3 border-t border-border text-sm">
           <span className="text-muted">
-            Всего: {total} клиентов
+            {t('clients_page.total')}: {total} {t('clients_page.clients')}
           </span>
           <div className="flex items-center gap-2">
             <button

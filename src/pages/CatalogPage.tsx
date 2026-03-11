@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { Package, Search, Plus } from 'lucide-react';
 import api from '../api/client';
@@ -6,6 +7,7 @@ import { useDebounce } from '../hooks/useDebounce';
 import { formatNumber } from '../utils/format';
 import { useAuthStore } from '../stores/authStore';
 import Spinner from '../components/Spinner';
+import GlassCard from '../components/GlassCard';
 
 interface Product {
   id: number;
@@ -21,17 +23,18 @@ interface Product {
   created_at: string;
 }
 
-const categories = [
-  { label: 'Все', value: '' },
-  { label: 'Филлеры', value: 'Филлеры' },
-  { label: 'Мезотерапия', value: 'Мезотерапия' },
-  { label: 'Кремы', value: 'Кремы' },
-  { label: 'Биодобавки', value: 'Биодобавки' },
-  { label: 'Нити', value: 'Нити' },
-  { label: 'Оборудование', value: 'Оборудование' },
+const CATEGORY_KEYS = [
+  { labelKey: 'catalog.all', value: '' },
+  { labelKey: 'catalog.fillers', value: 'Филлеры' },
+  { labelKey: 'catalog.meso', value: 'Мезотерапия' },
+  { labelKey: 'catalog.creams', value: 'Кремы' },
+  { labelKey: 'catalog.supplements', value: 'Биодобавки' },
+  { labelKey: 'catalog.threads', value: 'Нити' },
+  { labelKey: 'catalog.equipment', value: 'Оборудование' },
 ];
 
 export default function CatalogPage() {
+  const { t } = useTranslation();
   const { user } = useAuthStore();
   const [loading, setLoading] = useState<boolean>(true);
   const [products, setProducts] = useState<Product[]>([]);
@@ -68,14 +71,19 @@ export default function CatalogPage() {
   const totalPages = Math.ceil(total / limit);
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+    <motion.div
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.5 }}
+      className="space-y-6"
+    >
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h1 className="text-2xl font-bold">Каталог товаров</h1>
+        <h1 className="text-2xl font-bold">{t('catalog.productsTitle')}</h1>
         {user?.role === 'admin' && (
           <button className="bg-gold hover:bg-gold-hover text-white rounded-lg px-4 py-2 flex items-center gap-2 transition-colors cursor-pointer">
             <Plus size={18} />
-            Добавить товар
+            {t('catalog.add')}
           </button>
         )}
       </div>
@@ -85,83 +93,117 @@ export default function CatalogPage() {
         <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
         <input
           type="text"
-          placeholder="Поиск по названию или SKU..."
+          placeholder={t('catalog.search')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full bg-bg border border-border rounded-lg pl-10 pr-4 py-2.5 text-text focus:outline-none focus:border-gold"
+          className="input-glass pl-10 pr-4 py-2.5"
         />
       </div>
 
       {/* Category filter */}
       <div className="flex flex-wrap gap-2">
-        {categories.map((cat) => (
+        {CATEGORY_KEYS.map((cat) => (
           <button
             key={cat.value}
             onClick={() => setBrand(cat.value)}
-            className={`px-4 py-2 rounded-lg text-sm transition-colors cursor-pointer ${
+            className="cursor-pointer"
+            style={
               brand === cat.value
-                ? 'bg-gold text-white'
-                : 'bg-card border border-border text-muted hover:text-text'
-            }`}
+                ? {
+                    background: 'linear-gradient(135deg, #B8860B, #FFD700)',
+                    color: '#fff',
+                    padding: '8px 16px',
+                    borderRadius: 8,
+                    fontSize: 14,
+                    fontWeight: 600,
+                    border: 'none',
+                    boxShadow: '0 4px 15px rgba(184,134,11,0.3)',
+                    transition: 'all 0.2s',
+                  }
+                : {
+                    background: 'rgba(255,255,255,0.06)',
+                    border: '1px solid rgba(255,255,255,0.12)',
+                    color: 'var(--color-muted)',
+                    padding: '8px 16px',
+                    borderRadius: 8,
+                    fontSize: 14,
+                    fontWeight: 500,
+                    transition: 'all 0.2s',
+                  }
+            }
           >
-            {cat.label}
+            {t(cat.labelKey)}
           </button>
         ))}
       </div>
 
       {/* Product grid */}
-      {loading ? <Spinner className="py-12" /> : <>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {products.map((product) => (
-          <div
-            key={product.id}
-            className="bg-card rounded-xl border border-border p-4 flex flex-col gap-3"
-          >
-            {/* Placeholder image */}
-            <div className="w-full aspect-square bg-bg rounded-lg flex items-center justify-center">
-              <Package size={48} className="text-muted" />
-            </div>
+      {loading ? (
+        <Spinner className="py-12" />
+      ) : (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            {products.map((product, i) => (
+              <GlassCard key={product.id} index={i} tilt className="p-4 flex flex-col gap-3">
+                {/* Placeholder image */}
+                <div className="w-full aspect-square glass-card rounded-lg flex items-center justify-center">
+                  <Package size={48} className="text-muted" />
+                </div>
 
-            {/* Name */}
-            <h3 className="font-bold text-sm leading-tight line-clamp-2">{product.name}</h3>
+                {/* Name */}
+                <h3 className="font-bold text-sm leading-tight line-clamp-2">{product.name}</h3>
 
-            {/* Price */}
-            <p className="text-gold font-bold text-lg">{formatNumber(product.price)} ₴</p>
+                {/* Price */}
+                <p style={{ fontSize: 20, fontWeight: 700, color: '#00D4AA' }}>
+                  {formatNumber(product.price)} ₴
+                </p>
 
-            {/* Badges row */}
-            <div className="flex flex-wrap items-center gap-2">
-              {product.brand && (
-                <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-bg border border-border text-muted">
-                  {product.brand}
-                </span>
-              )}
-              {product.price > 1000 && (
-                <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-gold/20 text-gold">
-                  GinCoin
-                </span>
-              )}
-            </div>
+                {/* Badges row */}
+                <div className="flex flex-wrap items-center gap-2">
+                  {product.brand && (
+                    <span className="btn-secondary px-2.5 py-1 rounded-full text-xs font-medium">
+                      {product.brand}
+                    </span>
+                  )}
+                  {product.price > 1000 && (
+                    <span
+                      style={{
+                        background: 'linear-gradient(135deg, #B8860B, #FFD700)',
+                        color: '#000',
+                        fontSize: 11,
+                        fontWeight: 600,
+                        borderRadius: 9999,
+                        padding: '2px 10px',
+                      }}
+                    >
+                      GinCoin
+                    </span>
+                  )}
+                </div>
 
-            {/* Stock indicator */}
-            <div className="mt-auto">
-              <span
-                className={`text-xs font-medium ${
-                  product.stock_quantity > product.min_stock_level ? 'text-green' : 'text-error'
-                }`}
-              >
-                В наличии: {product.stock_quantity} шт.
-              </span>
-            </div>
+                {/* Stock indicator */}
+                <div className="mt-auto">
+                  <span
+                    style={{
+                      fontSize: 12,
+                      fontWeight: 500,
+                      color: product.stock_quantity > product.min_stock_level ? '#00D4AA' : '#E74C3C',
+                    }}
+                  >
+                    {t('catalog.inStock', { count: product.stock_quantity })}
+                  </span>
+                </div>
+              </GlassCard>
+            ))}
           </div>
-        ))}
-      </div>
 
-      {products.length === 0 && (
-        <div className="bg-card rounded-xl border border-border p-8 text-center">
-          <p className="text-muted">Товары не найдены</p>
-        </div>
+          {products.length === 0 && (
+            <GlassCard tilt={false} className="p-8 text-center">
+              <p className="text-muted">{t('catalog.notFound')}</p>
+            </GlassCard>
+          )}
+        </>
       )}
-      </>}
 
       {/* Pagination */}
       {totalPages > 1 && (
@@ -170,11 +212,29 @@ export default function CatalogPage() {
             <button
               key={p}
               onClick={() => setPage(p)}
-              className={`w-9 h-9 rounded-lg text-sm transition-colors cursor-pointer ${
+              className="cursor-pointer"
+              style={
                 page === p
-                  ? 'bg-gold text-white'
-                  : 'bg-card border border-border text-muted hover:text-text'
-              }`}
+                  ? {
+                      background: 'linear-gradient(135deg, #B8860B, #FFD700)',
+                      color: '#fff',
+                      width: 36,
+                      height: 36,
+                      borderRadius: 8,
+                      fontSize: 14,
+                      fontWeight: 600,
+                      border: 'none',
+                    }
+                  : {
+                      background: 'rgba(255,255,255,0.06)',
+                      border: '1px solid rgba(255,255,255,0.12)',
+                      color: 'var(--color-muted)',
+                      width: 36,
+                      height: 36,
+                      borderRadius: 8,
+                      fontSize: 14,
+                    }
+              }
             >
               {p}
             </button>

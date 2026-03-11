@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { Package, X } from 'lucide-react';
 import api from '../api/client';
@@ -29,6 +30,7 @@ interface Balance {
 }
 
 export default function GinCoinShopPage() {
+  const { t } = useTranslation();
   const { user } = useAuthStore();
   const [products, setProducts] = useState<Product[]>([]);
   const [balance, setBalance] = useState<Balance | null>(null);
@@ -54,11 +56,11 @@ export default function GinCoinShopPage() {
     setMessage(null);
     try {
       await api.post('/gincoin/exchange', { productId: product.id, quantity: 1 });
-      setMessage({ type: 'success', text: `Обмен успешен: ${product.name}` });
+      setMessage({ type: 'success', text: t('gincoin.exchangeSuccess', { name: product.name }) });
       const { data } = await api.get('/gincoin/balance');
       setBalance(data);
     } catch {
-      setMessage({ type: 'error', text: 'Ошибка при обмене' });
+      setMessage({ type: 'error', text: t('gincoin.errorExchange') });
     } finally {
       setLoading(false);
       setConfirmProduct(null);
@@ -72,11 +74,11 @@ export default function GinCoinShopPage() {
     setMessage(null);
     try {
       await api.post('/gincoin/withdraw', { amount });
-      setMessage({ type: 'success', text: `Вывод ${formatNumber(amount)} ₴ успешен` });
+      setMessage({ type: 'success', text: t('gincoin.withdrawSuccess', { amount: formatNumber(amount) }) });
       const { data } = await api.get('/gincoin/balance');
       setBalance(data);
     } catch {
-      setMessage({ type: 'error', text: 'Ошибка при выводе' });
+      setMessage({ type: 'error', text: t('gincoin.withdrawError') });
     } finally {
       setLoading(false);
       setWithdrawOpen(false);
@@ -90,17 +92,17 @@ export default function GinCoinShopPage() {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h1 className="text-2xl font-bold">Магазин GinCoin</h1>
+        <h1 className="text-2xl font-bold">{t('gincoin.shopTitle')}</h1>
         <div className="flex items-center gap-4">
           <span className="text-gold font-bold text-lg">
-            Баланс: {formatNumber(balance?.balance || 0)} GC
+            {t('gincoin.balanceAmount', { amount: formatNumber(balance?.balance || 0) })}
           </span>
           {isManager && (
             <button
               onClick={() => setWithdrawOpen(true)}
               className="bg-gold hover:bg-gold-hover text-white rounded-lg px-4 py-2 transition-colors cursor-pointer font-semibold"
             >
-              Вывести в ₴
+              {t('gincoin.withdraw')}
             </button>
           )}
         </div>
@@ -138,7 +140,7 @@ export default function GinCoinShopPage() {
                 disabled={loading}
                 className="w-full bg-gold hover:bg-gold-hover text-white rounded-lg px-4 py-2 transition-colors cursor-pointer font-medium disabled:opacity-50"
               >
-                Обменять
+                {t('gincoin.exchangeBtn')}
               </button>
             </div>
           </div>
@@ -147,7 +149,7 @@ export default function GinCoinShopPage() {
 
       {products.length === 0 && (
         <div className="bg-card rounded-xl border border-border p-8 text-center">
-          <p className="text-muted">Товары не найдены</p>
+          <p className="text-muted">{t('gincoin.productsNotFound')}</p>
         </div>
       )}
 
@@ -156,7 +158,7 @@ export default function GinCoinShopPage() {
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
           <div className="bg-card rounded-xl border border-border p-6 max-w-sm w-full space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="font-bold text-lg">Подтверждение</h3>
+              <h3 className="font-bold text-lg">{t('gincoin.confirmation')}</h3>
               <button
                 onClick={() => setConfirmProduct(null)}
                 className="text-muted hover:text-text cursor-pointer"
@@ -165,7 +167,7 @@ export default function GinCoinShopPage() {
               </button>
             </div>
             <p className="text-text">
-              Обменять <span className="font-semibold">{confirmProduct.name}</span> за{' '}
+              {t('gincoin.exchangeConfirmText')} <span className="font-semibold">{confirmProduct.name}</span> {t('gincoin.exchangeConfirmFor')}{' '}
               <span className="text-gold font-bold">{formatNumber(confirmProduct.price)} GC</span>?
             </p>
             <div className="flex gap-3">
@@ -173,14 +175,14 @@ export default function GinCoinShopPage() {
                 onClick={() => setConfirmProduct(null)}
                 className="flex-1 bg-bg border border-border rounded-lg px-4 py-2 text-muted hover:text-text transition-colors cursor-pointer"
               >
-                Отмена
+                {t('common.cancel')}
               </button>
               <button
                 onClick={() => handleExchange(confirmProduct)}
                 disabled={loading}
                 className="flex-1 bg-gold hover:bg-gold-hover text-white rounded-lg px-4 py-2 transition-colors cursor-pointer font-medium disabled:opacity-50"
               >
-                {loading ? 'Обмен...' : 'Подтвердить'}
+                {loading ? t('gincoin.exchangeLoading') : t('gincoin.confirm')}
               </button>
             </div>
           </div>
@@ -192,7 +194,7 @@ export default function GinCoinShopPage() {
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
           <div className="bg-card rounded-xl border border-border p-6 max-w-sm w-full space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="font-bold text-lg">Вывести в ₴</h3>
+              <h3 className="font-bold text-lg">{t('gincoin.withdraw')}</h3>
               <button
                 onClick={() => setWithdrawOpen(false)}
                 className="text-muted hover:text-text cursor-pointer"
@@ -201,16 +203,16 @@ export default function GinCoinShopPage() {
               </button>
             </div>
             <div>
-              <label className="block text-sm text-muted mb-1">Сумма (GC)</label>
+              <label className="block text-sm text-muted mb-1">{t('gincoin.withdrawAmountLabel')}</label>
               <input
                 type="number"
                 value={withdrawAmount}
                 onChange={(e) => setWithdrawAmount(e.target.value)}
-                placeholder="Введите сумму"
+                placeholder={t('gincoin.enterAmount')}
                 className="w-full bg-bg border border-border rounded-lg px-4 py-2.5 text-text focus:outline-none focus:border-gold"
               />
               <p className="text-xs text-muted mt-1">
-                Доступно: {formatNumber(balance?.balance || 0)} GC
+                {t('gincoin.available', { amount: formatNumber(balance?.balance || 0) })}
               </p>
             </div>
             <div className="flex gap-3">
@@ -218,14 +220,14 @@ export default function GinCoinShopPage() {
                 onClick={() => setWithdrawOpen(false)}
                 className="flex-1 bg-bg border border-border rounded-lg px-4 py-2 text-muted hover:text-text transition-colors cursor-pointer"
               >
-                Отмена
+                {t('common.cancel')}
               </button>
               <button
                 onClick={handleWithdraw}
                 disabled={loading || !withdrawAmount || Number(withdrawAmount) <= 0}
                 className="flex-1 bg-gold hover:bg-gold-hover text-white rounded-lg px-4 py-2 transition-colors cursor-pointer font-medium disabled:opacity-50"
               >
-                {loading ? 'Вывод...' : 'Вывести'}
+                {loading ? t('gincoin.withdrawLoading') : t('gincoin.withdraw')}
               </button>
             </div>
           </div>

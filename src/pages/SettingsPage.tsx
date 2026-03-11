@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, X, Save, Eye, EyeOff } from 'lucide-react';
 import api from '../api/client';
@@ -30,22 +31,22 @@ interface Target {
 
 type TabKey = 'profile' | 'users' | 'kpi';
 
-const METRIC_LABELS: Record<string, string> = {
-  revenue: 'Выручка',
-  avg_check: 'Средний чек',
-  retention: 'Удержание клиентов (%)',
-  calls_per_day: 'Звонков в день',
-  meetings_target: 'Встречи',
-  seminars_target: 'Семинары',
-  leads_target: 'Лиды',
+const METRIC_KEYS: Record<string, string> = {
+  revenue: 'settings.metricRevenue',
+  avg_check: 'settings.metricAvgCheck',
+  retention: 'settings.metricRetention',
+  calls_per_day: 'settings.metricCalls',
+  meetings_target: 'settings.metricMeetings',
+  seminars_target: 'settings.metricSeminars',
+  leads_target: 'settings.metricLeads',
 };
 
-const DEFAULT_METRICS = Object.keys(METRIC_LABELS);
+const DEFAULT_METRICS = Object.keys(METRIC_KEYS);
 
-const ROLE_LABELS: Record<string, string> = {
-  admin: 'Админ',
-  manager: 'Менеджер',
-  dealer: 'Дилер',
+const ROLE_KEYS: Record<string, string> = {
+  admin: 'settings.admin',
+  manager: 'settings.manager',
+  dealer: 'settings.dealer',
 };
 
 const ROLE_BADGE: Record<string, string> = {
@@ -57,6 +58,7 @@ const ROLE_BADGE: Record<string, string> = {
 // --------------- Component ---------------
 
 export default function SettingsPage() {
+  const { t } = useTranslation();
   const user = useAuthStore((s) => s.user);
   const addToast = useToastStore((s) => s.addToast);
   const isAdmin = user?.role === 'admin';
@@ -64,9 +66,9 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<TabKey>('profile');
 
   const tabs: { key: TabKey; label: string; adminOnly?: boolean }[] = [
-    { key: 'profile', label: 'Профиль' },
-    { key: 'users', label: 'Пользователи', adminOnly: true },
-    { key: 'kpi', label: 'KPI Цели', adminOnly: true },
+    { key: 'profile', label: t('settings.profile') },
+    { key: 'users', label: t('settings.users'), adminOnly: true },
+    { key: 'kpi', label: t('settings.kpiTargets'), adminOnly: true },
   ];
 
   const visibleTabs = tabs.filter((t) => !t.adminOnly || isAdmin);
@@ -102,6 +104,7 @@ export default function SettingsPage() {
 // ===================== PROFILE TAB =====================
 
 function ProfileTab() {
+  const { t } = useTranslation();
   const user = useAuthStore((s) => s.user);
   const addToast = useToastStore((s) => s.addToast);
 
@@ -115,24 +118,24 @@ function ProfileTab() {
   const handleChangePassword = async (e: FormEvent) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
-      addToast('error', 'Пароли не совпадают');
+      addToast('error', t('settings.passwordMismatch'));
       return;
     }
     if (newPassword.length < 4) {
-      addToast('error', 'Пароль должен быть не менее 4 символов');
+      addToast('error', t('settings.passwordTooShort'));
       return;
     }
     setLoading(true);
     try {
       await api.put('/auth/password', { currentPassword, newPassword });
-      addToast('success', 'Пароль успешно изменён');
+      addToast('success', t('settings.passwordChanged'));
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
     } catch (err: unknown) {
       const message =
         (err as { response?: { data?: { error?: string } } }).response?.data?.error ||
-        'Ошибка смены пароля';
+        t('settings.passwordChangeError');
       addToast('error', message);
     } finally {
       setLoading(false);
@@ -148,10 +151,10 @@ function ProfileTab() {
     >
       {/* User info */}
       <div className="bg-card rounded-xl border border-border p-6">
-        <h2 className="text-lg font-semibold text-text mb-4">Информация</h2>
+        <h2 className="text-lg font-semibold text-text mb-4">{t('settings.info')}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <span className="text-sm text-muted">Имя</span>
+            <span className="text-sm text-muted">{t('settings.name')}</span>
             <p className="text-text font-medium">{user?.name ?? '—'}</p>
           </div>
           <div>
@@ -159,18 +162,18 @@ function ProfileTab() {
             <p className="text-text font-medium">{user?.email ?? '—'}</p>
           </div>
           <div>
-            <span className="text-sm text-muted">Роль</span>
-            <p className="text-text font-medium">{ROLE_LABELS[user?.role ?? ''] ?? user?.role}</p>
+            <span className="text-sm text-muted">{t('settings.role')}</span>
+            <p className="text-text font-medium">{t(ROLE_KEYS[user?.role ?? '']) ?? user?.role}</p>
           </div>
         </div>
       </div>
 
       {/* Change password */}
       <form onSubmit={handleChangePassword} className="bg-card rounded-xl border border-border p-6 space-y-4">
-        <h2 className="text-lg font-semibold text-text">Смена пароля</h2>
+        <h2 className="text-lg font-semibold text-text">{t('settings.changePassword')}</h2>
 
         <div>
-          <label className="block text-sm text-muted mb-1">Текущий пароль</label>
+          <label className="block text-sm text-muted mb-1">{t('settings.currentPassword')}</label>
           <div className="relative">
             <input
               type={showCurrent ? 'text' : 'password'}
@@ -190,7 +193,7 @@ function ProfileTab() {
         </div>
 
         <div>
-          <label className="block text-sm text-muted mb-1">Новый пароль</label>
+          <label className="block text-sm text-muted mb-1">{t('settings.newPassword')}</label>
           <div className="relative">
             <input
               type={showNew ? 'text' : 'password'}
@@ -210,7 +213,7 @@ function ProfileTab() {
         </div>
 
         <div>
-          <label className="block text-sm text-muted mb-1">Подтверждение пароля</label>
+          <label className="block text-sm text-muted mb-1">{t('settings.confirmPassword')}</label>
           <input
             type="password"
             value={confirmPassword}
@@ -226,7 +229,7 @@ function ProfileTab() {
           className="bg-gold text-bg px-6 py-2.5 rounded-lg font-medium hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2"
         >
           {loading ? <Spinner size="sm" /> : <Save size={16} />}
-          Сохранить
+          {t('common.save')}
         </button>
       </form>
     </motion.div>
@@ -236,6 +239,7 @@ function ProfileTab() {
 // ===================== USERS TAB =====================
 
 function UsersTab() {
+  const { t } = useTranslation();
   const addToast = useToastStore((s) => s.addToast);
   const [users, setUsers] = useState<UserRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -261,7 +265,7 @@ function UsersTab() {
       const { data } = await api.get('/auth/users');
       setUsers(data);
     } catch {
-      addToast('error', 'Ошибка загрузки пользователей');
+      addToast('error', t('settings.usersLoadError'));
     } finally {
       setLoading(false);
     }
@@ -282,7 +286,7 @@ function UsersTab() {
         password: addPassword,
         role: addRole,
       });
-      addToast('success', 'Пользователь создан');
+      addToast('success', t('settings.userCreated'));
       setShowAddForm(false);
       setAddName('');
       setAddEmail('');
@@ -292,7 +296,7 @@ function UsersTab() {
     } catch (err: unknown) {
       const message =
         (err as { response?: { data?: { error?: string } } }).response?.data?.error ||
-        'Ошибка создания пользователя';
+        t('settings.userCreateError');
       addToast('error', message);
     } finally {
       setAddLoading(false);
@@ -316,13 +320,13 @@ function UsersTab() {
         role: editRole,
         is_active: editActive,
       });
-      addToast('success', 'Пользователь обновлён');
+      addToast('success', t('settings.userUpdated'));
       setEditingId(null);
       await fetchUsers();
     } catch (err: unknown) {
       const message =
         (err as { response?: { data?: { error?: string } } }).response?.data?.error ||
-        'Ошибка обновления';
+        t('settings.userUpdateError');
       addToast('error', message);
     } finally {
       setEditLoading(false);
@@ -341,7 +345,7 @@ function UsersTab() {
       className="space-y-4"
     >
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-text">Пользователи ({formatNumber(users.length)})</h2>
+        <h2 className="text-lg font-semibold text-text">{t('settings.users')} ({formatNumber(users.length)})</h2>
         <button
           onClick={() => {
             setShowAddForm(!showAddForm);
@@ -350,7 +354,7 @@ function UsersTab() {
           className="bg-gold text-bg px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity flex items-center gap-2"
         >
           {showAddForm ? <X size={16} /> : <Plus size={16} />}
-          {showAddForm ? 'Отмена' : 'Добавить'}
+          {showAddForm ? t('common.cancel') : t('common.add')}
         </button>
       </div>
 
@@ -364,10 +368,10 @@ function UsersTab() {
             onSubmit={handleAdd}
             className="bg-card rounded-xl border border-border p-5 space-y-4 overflow-hidden"
           >
-            <h3 className="text-sm font-semibold text-text">Новый пользователь</h3>
+            <h3 className="text-sm font-semibold text-text">{t('settings.newUser')}</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm text-muted mb-1">Имя</label>
+                <label className="block text-sm text-muted mb-1">{t('settings.name')}</label>
                 <input
                   value={addName}
                   onChange={(e) => setAddName(e.target.value)}
@@ -386,7 +390,7 @@ function UsersTab() {
                 />
               </div>
               <div>
-                <label className="block text-sm text-muted mb-1">Пароль</label>
+                <label className="block text-sm text-muted mb-1">{t('settings.password')}</label>
                 <input
                   type="password"
                   value={addPassword}
@@ -396,15 +400,15 @@ function UsersTab() {
                 />
               </div>
               <div>
-                <label className="block text-sm text-muted mb-1">Роль</label>
+                <label className="block text-sm text-muted mb-1">{t('settings.role')}</label>
                 <select
                   value={addRole}
                   onChange={(e) => setAddRole(e.target.value)}
                   className="w-full bg-bg border border-border rounded-lg px-4 py-2 text-text focus:outline-none focus:border-gold"
                 >
-                  <option value="admin">Админ</option>
-                  <option value="manager">Менеджер</option>
-                  <option value="dealer">Дилер</option>
+                  <option value="admin">{t('settings.admin')}</option>
+                  <option value="manager">{t('settings.manager')}</option>
+                  <option value="dealer">{t('settings.dealer')}</option>
                 </select>
               </div>
             </div>
@@ -414,7 +418,7 @@ function UsersTab() {
               className="bg-gold text-bg px-5 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2"
             >
               {addLoading ? <Spinner size="sm" /> : <Plus size={16} />}
-              Создать
+              {t('common.create')}
             </button>
           </motion.form>
         )}
@@ -425,12 +429,12 @@ function UsersTab() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border text-muted">
-              <th className="text-left px-4 py-3 font-medium">Имя</th>
+              <th className="text-left px-4 py-3 font-medium">{t('settings.name')}</th>
               <th className="text-left px-4 py-3 font-medium">Email</th>
-              <th className="text-left px-4 py-3 font-medium">Роль</th>
-              <th className="text-left px-4 py-3 font-medium">Статус</th>
-              <th className="text-left px-4 py-3 font-medium">Дата создания</th>
-              <th className="text-right px-4 py-3 font-medium">Действие</th>
+              <th className="text-left px-4 py-3 font-medium">{t('settings.role')}</th>
+              <th className="text-left px-4 py-3 font-medium">{t('settings.status')}</th>
+              <th className="text-left px-4 py-3 font-medium">{t('settings.createdAt')}</th>
+              <th className="text-right px-4 py-3 font-medium">{t('settings.action')}</th>
             </tr>
           </thead>
           <tbody>
@@ -457,9 +461,9 @@ function UsersTab() {
                       onChange={(e) => setEditRole(e.target.value)}
                       className="bg-bg border border-border rounded px-2 py-1 text-text text-sm focus:outline-none focus:border-gold"
                     >
-                      <option value="admin">Админ</option>
-                      <option value="manager">Менеджер</option>
-                      <option value="dealer">Дилер</option>
+                      <option value="admin">{t('settings.admin')}</option>
+                      <option value="manager">{t('settings.manager')}</option>
+                      <option value="dealer">{t('settings.dealer')}</option>
                     </select>
                   </td>
                   <td className="px-4 py-2">
@@ -470,7 +474,7 @@ function UsersTab() {
                         onChange={(e) => setEditActive(e.target.checked)}
                         className="accent-gold w-4 h-4"
                       />
-                      <span className="text-sm text-text">{editActive ? 'Активен' : 'Неактивен'}</span>
+                      <span className="text-sm text-text">{editActive ? t('common.active') : t('common.inactive')}</span>
                     </label>
                   </td>
                   <td className="px-4 py-2 text-muted">
@@ -482,13 +486,13 @@ function UsersTab() {
                       disabled={editLoading}
                       className="text-green hover:opacity-80 text-sm font-medium disabled:opacity-50"
                     >
-                      {editLoading ? '...' : 'Сохранить'}
+                      {editLoading ? '...' : t('common.save')}
                     </button>
                     <button
                       onClick={() => setEditingId(null)}
                       className="text-muted hover:text-text text-sm"
                     >
-                      Отмена
+                      {t('common.cancel')}
                     </button>
                   </td>
                 </tr>
@@ -500,7 +504,7 @@ function UsersTab() {
                     <span
                       className={`px-2.5 py-1 rounded-full text-xs font-medium ${ROLE_BADGE[u.role] ?? 'bg-border text-muted'}`}
                     >
-                      {ROLE_LABELS[u.role] ?? u.role}
+                      {t(ROLE_KEYS[u.role]) ?? u.role}
                     </span>
                   </td>
                   <td className="px-4 py-3">
@@ -509,7 +513,7 @@ function UsersTab() {
                         className={`w-2 h-2 rounded-full ${u.is_active ? 'bg-green' : 'bg-error'}`}
                       />
                       <span className="text-muted text-sm">
-                        {u.is_active ? 'Активен' : 'Неактивен'}
+                        {u.is_active ? t('common.active') : t('common.inactive')}
                       </span>
                     </span>
                   </td>
@@ -521,7 +525,7 @@ function UsersTab() {
                       onClick={() => startEdit(u)}
                       className="text-gold hover:opacity-80 text-sm font-medium"
                     >
-                      Изменить
+                      {t('common.change')}
                     </button>
                   </td>
                 </tr>
@@ -537,6 +541,7 @@ function UsersTab() {
 // ===================== KPI TARGETS TAB =====================
 
 function KpiTargetsTab() {
+  const { t } = useTranslation();
   const addToast = useToastStore((s) => s.addToast);
 
   const [managers, setManagers] = useState<Manager[]>([]);
@@ -552,7 +557,7 @@ function KpiTargetsTab() {
         const { data } = await api.get('/kpi/managers');
         setManagers(data);
       } catch {
-        addToast('error', 'Ошибка загрузки менеджеров');
+        addToast('error', t('settings.managersLoadError'));
       } finally {
         setLoadingManagers(false);
       }
@@ -577,7 +582,7 @@ function KpiTargetsTab() {
         }
         setTargets(map);
       } catch {
-        addToast('error', 'Ошибка загрузки целей');
+        addToast('error', t('settings.targetsLoadError'));
       } finally {
         setLoadingTargets(false);
       }
@@ -597,9 +602,9 @@ function KpiTargetsTab() {
         }),
       );
       await Promise.all(promises);
-      addToast('success', 'Цели сохранены');
+      addToast('success', t('settings.targetsSaved'));
     } catch {
-      addToast('error', 'Ошибка сохранения целей');
+      addToast('error', t('settings.targetsSaveError'));
     } finally {
       setSaving(false);
     }
@@ -617,16 +622,16 @@ function KpiTargetsTab() {
       className="space-y-4"
     >
       <div className="bg-card rounded-xl border border-border p-6 space-y-4">
-        <h2 className="text-lg font-semibold text-text">KPI Цели менеджера</h2>
+        <h2 className="text-lg font-semibold text-text">{t('settings.kpiTargetsTitle')}</h2>
 
         <div>
-          <label className="block text-sm text-muted mb-1">Менеджер</label>
+          <label className="block text-sm text-muted mb-1">{t('settings.manager')}</label>
           <select
             value={selectedManager ?? ''}
             onChange={(e) => setSelectedManager(e.target.value ? Number(e.target.value) : null)}
             className="w-full sm:w-72 bg-bg border border-border rounded-lg px-4 py-2.5 text-text focus:outline-none focus:border-gold"
           >
-            <option value="">Выберите менеджера</option>
+            <option value="">{t('settings.selectManager')}</option>
             {managers.map((m) => (
               <option key={m.id} value={m.id}>
                 {m.name}
@@ -645,14 +650,14 @@ function KpiTargetsTab() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border text-muted">
-                    <th className="text-left px-4 py-3 font-medium">Метрика</th>
-                    <th className="text-left px-4 py-3 font-medium">Целевое значение</th>
+                    <th className="text-left px-4 py-3 font-medium">{t('settings.metric')}</th>
+                    <th className="text-left px-4 py-3 font-medium">{t('settings.targetValue')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {DEFAULT_METRICS.map((metric) => (
                     <tr key={metric} className="border-b border-border">
-                      <td className="px-4 py-3 text-text">{METRIC_LABELS[metric]}</td>
+                      <td className="px-4 py-3 text-text">{t(METRIC_KEYS[metric])}</td>
                       <td className="px-4 py-3">
                         <input
                           type="number"
@@ -679,7 +684,7 @@ function KpiTargetsTab() {
                   className="bg-gold text-bg px-6 py-2.5 rounded-lg font-medium hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2"
                 >
                   {saving ? <Spinner size="sm" /> : <Save size={16} />}
-                  Сохранить все
+                  {t('settings.saveAll')}
                 </button>
               </div>
             </>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import {
@@ -19,6 +19,8 @@ import {
 } from 'recharts';
 import api from '../api/client';
 import { formatNumber } from '../utils/format';
+import GlassCard from '../components/GlassCard';
+import Spinner from '../components/Spinner';
 
 interface Stats {
   clients: { total: number; new: number };
@@ -58,6 +60,26 @@ function generateMockChartData() {
   return data;
 }
 
+function AnimatedNumber({ value, prefix = '', suffix = '' }: { value: number; prefix?: string; suffix?: string }) {
+  const [display, setDisplay] = useState(0);
+  const ref = useRef<number>(0);
+  useEffect(() => {
+    const start = performance.now();
+    const from = ref.current;
+    const to = value;
+    function tick(now: number) {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / 1000, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplay(Math.round(from + (to - from) * eased));
+      if (progress < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+    ref.current = value;
+  }, [value]);
+  return <>{prefix}{formatNumber(display)}{suffix}</>;
+}
+
 export default function DashboardPage() {
   const { t } = useTranslation();
   const [stats, setStats] = useState<Stats | null>(null);
@@ -94,139 +116,196 @@ export default function DashboardPage() {
   const statCards = [
     {
       label: t('dashboard_page.total_revenue'),
-      value: stats ? `₴ ${formatNumber(stats.revenue.total_revenue)}` : '—',
+      numericValue: stats ? stats.revenue.total_revenue : 0,
+      prefix: '₴ ',
+      suffix: '',
       icon: DollarSign,
-      color: 'text-gold',
+      gradient: 'linear-gradient(135deg, #00D4AA, #00B894)',
     },
     {
       label: t('dashboard_page.orders_count'),
-      value: stats ? formatNumber(stats.orders.total) : '—',
+      numericValue: stats ? stats.orders.total : 0,
+      prefix: '',
+      suffix: '',
       icon: ShoppingCart,
-      color: 'text-blue-400',
+      gradient: 'linear-gradient(135deg, #4A90D9, #357ABD)',
     },
     {
       label: t('dashboard_page.clients_count'),
-      value: stats ? formatNumber(stats.clients.total) : '—',
+      numericValue: stats ? stats.clients.total : 0,
+      prefix: '',
+      suffix: '',
       icon: Users,
-      color: 'text-green',
+      gradient: 'linear-gradient(135deg, #9B59B6, #8E44AD)',
     },
     {
       label: t('dashboard_page.avg_check'),
-      value: stats ? `₴ ${formatNumber(avgCheck)}` : '—',
+      numericValue: avgCheck,
+      prefix: '₴ ',
+      suffix: '',
       icon: TrendingUp,
-      color: 'text-gold',
+      gradient: 'linear-gradient(135deg, #B8860B, #FFD700)',
     },
   ];
 
-  const statusMap: Record<string, { label: string; cls: string }> = {
-    new: { label: 'Новый', cls: 'text-blue-400' },
-    pending: { label: 'Ожидает', cls: 'text-yellow-400' },
-    processing: { label: 'В работе', cls: 'text-blue-400' },
-    completed: { label: 'Завершён', cls: 'text-green' },
-    cancelled: { label: 'Отменён', cls: 'text-error' },
+  const statusBadge = (status: string) => {
+    const map: Record<string, { label: string; bg: string; color: string }> = {
+      new: { label: t('orders.new'), bg: 'rgba(74,144,217,0.15)', color: '#4A90D9' },
+      pending: { label: t('orders.pending'), bg: 'rgba(241,196,15,0.15)', color: '#F1C40F' },
+      processing: { label: t('orders.processing'), bg: 'rgba(241,196,15,0.15)', color: '#F1C40F' },
+      completed: { label: t('orders.completed'), bg: 'rgba(0,212,170,0.15)', color: '#00D4AA' },
+      cancelled: { label: t('orders.cancelled'), bg: 'rgba(231,76,60,0.15)', color: '#E74C3C' },
+    };
+    const st = map[status] ?? { label: status, bg: 'rgba(255,255,255,0.06)', color: '#888' };
+    return (
+      <span
+        style={{
+          background: st.bg,
+          color: st.color,
+          padding: '4px 12px',
+          borderRadius: 9999,
+          fontSize: 12,
+          fontWeight: 600,
+          whiteSpace: 'nowrap',
+        }}
+      >
+        {st.label}
+      </span>
+    );
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <span className="text-muted">{t('dashboard_page.loading')}</span>
-      </div>
-    );
+    return <Spinner className="py-24" size="lg" />;
   }
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-      {/* ── Stat Cards ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+    <motion.div
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.5 }}
+      className="space-y-6"
+    >
+      {/* Stat Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 pt-4">
         {statCards.map((c, i) => (
-          <div key={i} className="bg-card rounded-xl border border-border p-5 flex items-center gap-4">
-            <div className={`p-3 rounded-lg bg-bg ${c.color}`}>
-              <c.icon size={22} />
+          <GlassCard key={i} index={i} tilt className="p-5 flex items-center gap-4">
+            <div
+              style={{
+                background: c.gradient,
+                width: 44,
+                height: 44,
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+            >
+              <c.icon size={22} color="#fff" />
             </div>
             <div className="min-w-0">
-              <p className="text-muted text-xs">{c.label}</p>
-              <p className={`text-lg font-semibold truncate ${c.color}`}>{c.value}</p>
+              <p style={{ color: 'var(--color-muted)', fontSize: 12, textTransform: 'uppercase', letterSpacing: 1 }}>
+                {c.label}
+              </p>
+              <p style={{ fontSize: 28, fontWeight: 700 }}>
+                {stats ? (
+                  <AnimatedNumber value={c.numericValue} prefix={c.prefix} suffix={c.suffix} />
+                ) : '—'}
+              </p>
             </div>
-          </div>
+          </GlassCard>
         ))}
       </div>
 
-      {/* ── Revenue Chart ── */}
-      <div className="bg-card rounded-xl border border-border p-6">
+      {/* Revenue Chart */}
+      <GlassCard tilt={false} className="p-6">
         <h2 className="text-base font-semibold mb-4">{t('dashboard_page.monthly_revenue')}</h2>
         <ResponsiveContainer width="100%" height={280}>
           <AreaChart data={chartData}>
             <defs>
-              <linearGradient id="goldGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#B8860B" stopOpacity={0.4} />
-                <stop offset="95%" stopColor="#B8860B" stopOpacity={0} />
+              <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="rgba(255, 107, 107, 0.25)" stopOpacity={1} />
+                <stop offset="95%" stopColor="rgba(255, 107, 107, 0)" stopOpacity={0} />
               </linearGradient>
+              <filter id="chartGlow">
+                <feDropShadow dx="0" dy="0" stdDeviation="4" floodColor="rgba(0, 212, 170, 0.5)" />
+              </filter>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="#2A2A3E" />
             <XAxis dataKey="date" stroke="#888" fontSize={11} />
             <YAxis stroke="#888" fontSize={11} tickFormatter={(v: number) => `${(v / 1000).toFixed(0)}k`} />
             <Tooltip
-              contentStyle={{ backgroundColor: '#1A1A2E', border: '1px solid #2A2A3E', borderRadius: 8, color: '#E0E0E0' }}
+              contentStyle={{
+                backgroundColor: 'rgba(26,26,46,0.9)',
+                backdropFilter: 'blur(20px)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: 12,
+                color: '#E0E0E0',
+              }}
               formatter={(v) => [`₴ ${formatNumber(v as number)}`, t('dashboard_page.total_revenue')]}
             />
-            <Area type="monotone" dataKey="revenue" stroke="#B8860B" fill="url(#goldGrad)" strokeWidth={2} />
+            <Area
+              type="monotone"
+              dataKey="revenue"
+              stroke="#00D4AA"
+              fill="url(#chartGrad)"
+              strokeWidth={2}
+              style={{ filter: 'url(#chartGlow)' }}
+            />
           </AreaChart>
         </ResponsiveContainer>
-      </div>
+      </GlassCard>
 
-      {/* ── Two-column: Orders + Top Clients ── */}
+      {/* Two-column: Orders + Top Clients */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
         {/* Recent Orders */}
-        <div className="bg-card rounded-xl border border-border p-5">
+        <GlassCard tilt={false} className="p-5">
           <h2 className="text-base font-semibold mb-3">{t('dashboard_page.recent_orders')}</h2>
           <div className="overflow-x-auto -mx-5 px-5">
             <table className="w-full text-sm min-w-[400px]">
               <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left py-2 pr-3 text-xs text-muted font-normal uppercase">ID</th>
-                  <th className="text-left py-2 pr-3 text-xs text-muted font-normal uppercase">{t('clients_page.name') || 'Клиент'}</th>
-                  <th className="text-right py-2 pr-3 text-xs text-muted font-normal uppercase">{t('dashboard_page.total_revenue') ? 'Сумма' : 'Сумма'}</th>
-                  <th className="text-left py-2 text-xs text-muted font-normal uppercase">{t('clients_page.status') || 'Статус'}</th>
+                <tr>
+                  <th className="table-header text-left py-2 pr-3">ID</th>
+                  <th className="table-header text-left py-2 pr-3">{t('orders.client')}</th>
+                  <th className="table-header text-right py-2 pr-3">{t('orders.amount')}</th>
+                  <th className="table-header text-left py-2">{t('orders.status')}</th>
                 </tr>
               </thead>
               <tbody>
                 {recentOrders.length === 0 ? (
                   <tr><td colSpan={4} className="text-center py-6 text-muted">{t('dashboard_page.no_data')}</td></tr>
-                ) : recentOrders.map((o, i) => {
-                  const st = statusMap[o.status] ?? { label: o.status, cls: 'text-muted' };
-                  return (
-                    <tr key={o.id} className={`border-b border-border/40 hover:bg-sidebar/60 transition-colors ${i % 2 === 0 ? '' : 'bg-bg/30'}`}>
-                      <td className="py-2.5 pr-3 text-muted">#{o.id}</td>
-                      <td className="py-2.5 pr-3">{o.client_name || '—'}</td>
-                      <td className="py-2.5 pr-3 text-right text-gold whitespace-nowrap">₴ {formatNumber(o.total_amount)}</td>
-                      <td className={`py-2.5 whitespace-nowrap ${st.cls}`}>{st.label}</td>
-                    </tr>
-                  );
-                })}
+                ) : recentOrders.map((o) => (
+                  <tr key={o.id} className="table-row-hover border-b border-border/40">
+                    <td className="py-2.5 pr-3 text-muted">#{o.id}</td>
+                    <td className="py-2.5 pr-3">{o.client_name || '—'}</td>
+                    <td className="py-2.5 pr-3 text-right text-gold whitespace-nowrap">₴ {formatNumber(o.total_amount)}</td>
+                    <td className="py-2.5">{statusBadge(o.status)}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
-        </div>
+        </GlassCard>
 
         {/* Top Clients */}
-        <div className="bg-card rounded-xl border border-border p-5">
+        <GlassCard tilt={false} className="p-5">
           <h2 className="text-base font-semibold mb-3">{t('dashboard_page.top_clients')}</h2>
           <div className="overflow-x-auto -mx-5 px-5">
             <table className="w-full text-sm min-w-[400px]">
               <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left py-2 pr-3 text-xs text-muted font-normal uppercase">{t('clients_page.name') || 'Имя'}</th>
-                  <th className="text-left py-2 pr-3 text-xs text-muted font-normal uppercase">{t('clients_page.company') || 'Компания'}</th>
-                  <th className="text-right py-2 pr-3 text-xs text-muted font-normal uppercase">Заказов</th>
-                  <th className="text-right py-2 text-xs text-muted font-normal uppercase">Сумма</th>
+                <tr>
+                  <th className="table-header text-left py-2 pr-3">{t('clients.name')}</th>
+                  <th className="table-header text-left py-2 pr-3">{t('clients.company')}</th>
+                  <th className="table-header text-right py-2 pr-3">{t('clients.ordersCount')}</th>
+                  <th className="table-header text-right py-2">{t('orders.amount')}</th>
                 </tr>
               </thead>
               <tbody>
                 {topClients.length === 0 ? (
                   <tr><td colSpan={4} className="text-center py-6 text-muted">{t('dashboard_page.no_data')}</td></tr>
-                ) : topClients.map((c, i) => (
-                  <tr key={c.id} className={`border-b border-border/40 hover:bg-sidebar/60 transition-colors ${i % 2 === 0 ? '' : 'bg-bg/30'}`}>
+                ) : topClients.map((c) => (
+                  <tr key={c.id} className="table-row-hover border-b border-border/40">
                     <td className="py-2.5 pr-3">{c.name}</td>
                     <td className="py-2.5 pr-3 text-muted">{c.company || '—'}</td>
                     <td className="py-2.5 pr-3 text-right">{c.order_count}</td>
@@ -236,19 +315,34 @@ export default function DashboardPage() {
               </tbody>
             </table>
           </div>
-        </div>
+        </GlassCard>
       </div>
 
-      {/* ── GinCoin Balance ── */}
-      <div className="bg-card rounded-xl border border-border p-5 flex items-center gap-4">
-        <div className="p-3 rounded-lg bg-bg text-gold">
-          <Coins size={26} />
+      {/* GinCoin Balance */}
+      <GlassCard tilt={false} className="p-5 flex items-center gap-4">
+        <div
+          style={{
+            background: 'linear-gradient(135deg, #B8860B, #FFD700)',
+            width: 44,
+            height: 44,
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+          }}
+        >
+          <Coins size={22} color="#fff" />
         </div>
         <div>
-          <p className="text-muted text-xs">{t('dashboard_page.gincoin_balance')}</p>
-          <p className="text-xl font-bold text-gold">{formatNumber(1250)} GC</p>
+          <p style={{ color: 'var(--color-muted)', fontSize: 12, textTransform: 'uppercase', letterSpacing: 1 }}>
+            {t('dashboard_page.gincoin_balance')}
+          </p>
+          <p style={{ fontSize: 28, fontWeight: 700, color: '#FFD700' }}>
+            <AnimatedNumber value={1250} /> GC
+          </p>
         </div>
-      </div>
+      </GlassCard>
     </motion.div>
   );
 }

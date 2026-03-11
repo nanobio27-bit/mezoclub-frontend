@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import {
   Target,
@@ -9,12 +10,14 @@ import {
   UserPlus,
   Coins,
   AlertTriangle,
+  Flame,
 } from 'lucide-react';
 import api from '../api/client';
 import { useAuthStore } from '../stores/authStore';
 import { useToastStore } from '../stores/toastStore';
 import Spinner from '../components/Spinner';
 import { formatNumber } from '../utils/format';
+import GlassCard from '../components/GlassCard';
 
 interface KpiActuals {
   revenue: number;
@@ -54,10 +57,10 @@ interface Manager {
 
 type IncrementType = 'meeting' | 'call' | 'seminar' | 'lead';
 
-function progressColor(pct: number): string {
-  if (pct >= 100) return 'bg-green';
-  if (pct >= 50) return 'bg-yellow-500';
-  return 'bg-error';
+function getProgressColor(pct: number): string {
+  if (pct >= 100) return '#00D4AA';
+  if (pct >= 50) return '#F1C40F';
+  return '#E74C3C';
 }
 
 function progressTextColor(pct: number): string {
@@ -72,33 +75,40 @@ interface MetricCardProps {
   target: number;
   formatValue?: (v: number) => string;
   suffix?: string;
+  index?: number;
 }
 
-function MetricCard({ label, actual, target, formatValue, suffix }: MetricCardProps) {
+function MetricCard({ label, actual, target, formatValue, suffix, index = 0 }: MetricCardProps) {
   const pct = target > 0 ? Math.round((actual / target) * 100) : 0;
   const display = formatValue ? formatValue(actual) : formatNumber(actual);
   const targetDisplay = formatValue ? formatValue(target) : formatNumber(target);
+  const color = getProgressColor(pct);
 
   return (
-    <div className="bg-card rounded-xl border border-border p-5">
+    <GlassCard tilt index={index} className="p-5">
       <p className="text-muted text-xs mb-1">{label}</p>
       <p className="text-lg font-semibold">
         {display}{suffix ?? ''} <span className="text-muted text-sm font-normal">/ {targetDisplay}{suffix ?? ''}</span>
       </p>
-      <div className="mt-3 h-2 rounded-full bg-bg overflow-hidden">
+      <div className="mt-3 h-1.5 rounded-full bg-bg overflow-hidden">
         <motion.div
-          className={`h-full rounded-full ${progressColor(pct)}`}
+          className="h-full rounded-full"
+          style={{
+            backgroundColor: color,
+            boxShadow: `0 0 8px ${color}4D`,
+          }}
           initial={{ width: 0 }}
           animate={{ width: `${Math.min(pct, 100)}%` }}
           transition={{ duration: 0.6, ease: 'easeOut' }}
         />
       </div>
       <p className={`text-xs mt-1 ${progressTextColor(pct)}`}>{pct}%</p>
-    </div>
+    </GlassCard>
   );
 }
 
 export default function KpiPage() {
+  const { t } = useTranslation();
   const user = useAuthStore((s) => s.user);
   const addToast = useToastStore((s) => s.addToast);
   const isAdmin = user?.role === 'admin';
@@ -120,7 +130,7 @@ export default function KpiPage() {
       }
     } catch (err) {
       console.error('KPI fetch error:', err);
-      addToast('error', 'Ошибка загрузки KPI');
+      addToast('error', t('kpi.loadError'));
     }
   }, [isAdmin, addToast]);
 
@@ -141,7 +151,7 @@ export default function KpiPage() {
         }
       } catch (err) {
         console.error('KPI init error:', err);
-        addToast('error', 'Ошибка загрузки KPI');
+        addToast('error', t('kpi.loadError'));
       } finally {
         setLoading(false);
       }
@@ -156,7 +166,7 @@ export default function KpiPage() {
       const { data } = await api.get<KpiSummary>(`/kpi/user/${id}`);
       setKpi(data);
     } catch {
-      addToast('error', 'Ошибка загрузки KPI менеджера');
+      addToast('error', t('kpi.managerLoadError'));
     } finally {
       setLoading(false);
     }
@@ -166,10 +176,10 @@ export default function KpiPage() {
     setIncrementing(type);
     try {
       await api.post('/kpi/increment', { type });
-      addToast('success', 'Записано!');
+      addToast('success', t('kpi.recorded'));
       await fetchKpi(isAdmin && selectedManagerId ? selectedManagerId : undefined);
     } catch {
-      addToast('error', 'Ошибка записи');
+      addToast('error', t('kpi.recordError'));
     } finally {
       setIncrementing(null);
     }
@@ -185,10 +195,15 @@ export default function KpiPage() {
 
   if (!kpi) {
     return (
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-        <div className="bg-card rounded-xl border border-border p-8 text-center">
-          <p className="text-muted">Нет данных KPI</p>
-        </div>
+      <motion.div
+        initial={{ opacity: 0, x: 40 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.5, ease: 'easeOut' }}
+        className="space-y-6"
+      >
+        <GlassCard tilt={false} className="p-8 text-center">
+          <p className="text-muted">{t('kpi.noData')}</p>
+        </GlassCard>
       </motion.div>
     );
   }
@@ -198,14 +213,14 @@ export default function KpiPage() {
   const gc = kpi.gincoin_breakdown;
 
   const metrics = [
-    { label: 'Выручка', actual: a.revenue, target: targets.revenue ?? 600000, formatValue: (v: number) => `₴ ${formatNumber(v)}` },
-    { label: 'Средний чек', actual: a.avg_check, target: targets.avg_check ?? 11000, formatValue: (v: number) => `₴ ${formatNumber(v)}` },
-    { label: 'Retention Rate', actual: targets.retention ? Math.round((a.orders_count / (targets.retention * 4)) * 100) : 0, target: targets.retention ?? 25, suffix: '%' },
-    { label: 'Встречи', actual: a.meetings, target: targets.meetings ?? 15 },
-    { label: 'Звонки', actual: a.calls, target: targets.calls_per_day ? targets.calls_per_day * 22 : 220 },
-    { label: 'Семинары', actual: a.seminars, target: targets.seminars ?? 3 },
-    { label: 'Лиды / Привлечённые врачи', actual: a.leads, target: targets.leads ?? 10 },
-    { label: 'Серия', actual: a.streak_weeks, target: targets.streak ?? 4, suffix: ' нед.' },
+    { label: t('kpi.revenue'), actual: a.revenue, target: targets.revenue ?? 600000, formatValue: (v: number) => `₴ ${formatNumber(v)}` },
+    { label: t('kpi.avgCheck'), actual: a.avg_check, target: targets.avg_check ?? 11000, formatValue: (v: number) => `₴ ${formatNumber(v)}` },
+    { label: t('kpi.retention'), actual: targets.retention ? Math.round((a.orders_count / (targets.retention * 4)) * 100) : 0, target: targets.retention ?? 25, suffix: '%' },
+    { label: t('kpi.meetings'), actual: a.meetings, target: targets.meetings ?? 15 },
+    { label: t('kpi.calls'), actual: a.calls, target: targets.calls_per_day ? targets.calls_per_day * 22 : 220 },
+    { label: t('kpi.seminars'), actual: a.seminars, target: targets.seminars ?? 3 },
+    { label: t('kpi.leadsAndDoctors'), actual: a.leads, target: targets.leads ?? 10 },
+    { label: t('kpi.streak'), actual: a.streak_weeks, target: targets.streak ?? 4, suffix: ' ' + t('kpi.weeks') },
   ];
 
   const overallPct = Math.round(
@@ -215,15 +230,22 @@ export default function KpiPage() {
     }, 0) / metrics.length
   );
 
+  const overallColor = getProgressColor(overallPct);
+
   const counterButtons: { label: string; type: IncrementType; icon: typeof Phone }[] = [
-    { label: '+ Встреча', type: 'meeting', icon: Users },
-    { label: '+ Звонок', type: 'call', icon: Phone },
-    { label: '+ Семинар', type: 'seminar', icon: Presentation },
-    { label: '+ Лид', type: 'lead', icon: UserPlus },
+    { label: t('kpi.addMeeting'), type: 'meeting', icon: Users },
+    { label: t('kpi.addCall'), type: 'call', icon: Phone },
+    { label: t('kpi.addSeminar'), type: 'seminar', icon: Presentation },
+    { label: t('kpi.addLead'), type: 'lead', icon: UserPlus },
   ];
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+    <motion.div
+      initial={{ opacity: 0, x: 40 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.5, ease: 'easeOut' }}
+      className="space-y-6"
+    >
       {/* Admin tabs */}
       {isAdmin && managers.length > 0 && (
         <div className="flex flex-wrap gap-2">
@@ -231,10 +253,10 @@ export default function KpiPage() {
             <button
               key={m.id}
               onClick={() => handleSelectManager(m.id)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
                 selectedManagerId === m.id
-                  ? 'bg-gold text-bg'
-                  : 'bg-card border border-border text-muted hover:text-text'
+                  ? 'bg-gradient-to-r from-amber-600 to-yellow-500 text-white'
+                  : 'btn-secondary'
               }`}
             >
               {m.name}
@@ -244,35 +266,57 @@ export default function KpiPage() {
       )}
 
       {/* Overall progress */}
-      <div className="bg-card rounded-xl border border-border p-6 flex items-center gap-5">
+      <GlassCard tilt={false} className="p-6 flex items-center gap-5">
         <div className="p-3 rounded-lg bg-bg text-gold">
           <Target size={28} />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-muted text-xs mb-1">Общий прогресс KPI — {kpi.user_name}</p>
-          <p className={`text-3xl font-bold ${progressTextColor(overallPct)}`}>{overallPct}%</p>
-          <div className="mt-2 h-3 rounded-full bg-bg overflow-hidden">
+          <p className="text-muted text-xs mb-1">{t('kpi.overallProgress')} — {kpi.user_name}</p>
+          <div className="flex items-center gap-3">
+            <p className={`text-3xl font-bold ${progressTextColor(overallPct)}`}>{overallPct}%</p>
+            {a.streak_weeks > 0 && (
+              <motion.div
+                animate={{ scale: [1, 1.2, 1] }}
+                transition={{ repeat: Infinity, duration: 1.5 }}
+                className="flex items-center gap-1"
+              >
+                <Flame size={20} className="text-orange-500" />
+                <span className="text-sm font-semibold text-orange-400">{a.streak_weeks} {t('kpi.weeks')}</span>
+              </motion.div>
+            )}
+          </div>
+          <div className="mt-2 h-1.5 rounded-full bg-bg overflow-hidden">
             <motion.div
-              className={`h-full rounded-full ${progressColor(overallPct)}`}
+              className="h-full rounded-full"
+              style={{
+                backgroundColor: overallColor,
+                boxShadow: `0 0 8px ${overallColor}4D`,
+              }}
               initial={{ width: 0 }}
               animate={{ width: `${Math.min(overallPct, 100)}%` }}
               transition={{ duration: 0.8, ease: 'easeOut' }}
             />
           </div>
           <p className="text-xs text-muted mt-1">
-            Период: {new Date(kpi.period_start).toLocaleDateString('ru-RU')} — {new Date(kpi.period_end).toLocaleDateString('ru-RU')}
+            {t('kpi.period')}: {new Date(kpi.period_start).toLocaleDateString('ru-RU')} — {new Date(kpi.period_end).toLocaleDateString('ru-RU')}
           </p>
         </div>
-      </div>
+      </GlassCard>
 
       {/* Counter buttons */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {counterButtons.map((btn) => (
-          <button
+          <motion.button
             key={btn.type}
             onClick={() => handleIncrement(btn.type)}
             disabled={incrementing !== null}
-            className="bg-card rounded-xl border border-border p-4 flex items-center justify-center gap-2 text-sm font-medium hover:border-gold hover:text-gold transition-colors disabled:opacity-50"
+            whileTap={{ scale: 0.95 }}
+            className="rounded-full px-4 py-3 flex items-center justify-center gap-2 text-sm font-medium transition-colors disabled:opacity-50 cursor-pointer"
+            style={{
+              background: 'rgba(0,212,170,0.12)',
+              border: '1px solid rgba(0,212,170,0.3)',
+              color: '#00D4AA',
+            }}
           >
             {incrementing === btn.type ? (
               <Spinner size="sm" />
@@ -283,13 +327,13 @@ export default function KpiPage() {
                 <span>{btn.label}</span>
               </>
             )}
-          </button>
+          </motion.button>
         ))}
       </div>
 
       {/* KPI metric cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        {metrics.map((m) => (
+        {metrics.map((m, i) => (
           <MetricCard
             key={m.label}
             label={m.label}
@@ -297,38 +341,39 @@ export default function KpiPage() {
             target={m.target}
             formatValue={m.formatValue}
             suffix={m.suffix}
+            index={i}
           />
         ))}
       </div>
 
       {/* GinCoin breakdown */}
-      <div className="bg-card rounded-xl border border-border p-6">
+      <GlassCard tilt={false} className="p-6">
         <div className="flex items-center gap-3 mb-4">
           <div className="p-2 rounded-lg bg-bg text-gold">
             <Coins size={22} />
           </div>
-          <h2 className="text-base font-semibold">GinCoin за KPI</h2>
+          <h2 className="text-base font-semibold">{t('kpi.gincoinEarned')}</h2>
         </div>
 
         <div className="space-y-3 text-sm">
           <div className="flex justify-between">
-            <span className="text-muted">Лиды <span className="text-xs">(200 GC за каждые 10 лидов)</span></span>
+            <span className="text-muted">{t('kpi.leads')} <span className="text-xs">{t('kpi.leadsGCDesc')}</span></span>
             <span>{formatNumber(gc.leads)} GC</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-muted">Встречи <span className="text-xs">(100 GC каждая, 0 если &lt;15)</span></span>
+            <span className="text-muted">{t('kpi.meetings')} <span className="text-xs">{t('kpi.meetingsGCDesc')}</span></span>
             <span>{formatNumber(gc.meetings)} GC</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-muted">Семинары <span className="text-xs">(500 GC каждый, 0 если &le;2)</span></span>
+            <span className="text-muted">{t('kpi.seminars')} <span className="text-xs">{t('kpi.seminarsGCDesc')}</span></span>
             <span>{formatNumber(gc.seminars)} GC</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-muted">Серия <span className="text-xs">(200 GC за неделю)</span></span>
+            <span className="text-muted">{t('kpi.streak')} <span className="text-xs">{t('kpi.streakGCDesc')}</span></span>
             <span>{formatNumber(gc.streak)} GC</span>
           </div>
-          <div className="border-t border-border pt-3 flex justify-between">
-            <span className="font-bold">Итого</span>
+          <div className="border-t border-white/5 pt-3 flex justify-between">
+            <span className="font-bold">{t('kpi.total')}</span>
             <span className="font-bold text-gold">{formatNumber(gc.total)} GC</span>
           </div>
         </div>
@@ -337,16 +382,16 @@ export default function KpiPage() {
         {a.meetings < 15 && (
           <div className="mt-4 flex items-center gap-2 text-error text-sm">
             <AlertTriangle size={16} />
-            <span>Встречи сгорают — менее 15 за месяц</span>
+            <span>{t('kpi.warningMeetings')}</span>
           </div>
         )}
         {a.seminars <= 2 && (
           <div className="mt-2 flex items-center gap-2 text-error text-sm">
             <AlertTriangle size={16} />
-            <span>Семинары не засчитаны — нужно более 2</span>
+            <span>{t('kpi.warningSeminars')}</span>
           </div>
         )}
-      </div>
+      </GlassCard>
     </motion.div>
   );
 }

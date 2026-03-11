@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { Search, Plus, Trash2, ArrowLeft, ArrowRight, Check, ShoppingCart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -32,10 +33,10 @@ interface CartItem {
   quantity: number;
 }
 
-const steps = ['Клиент', 'Товары', 'Подтверждение'];
-
 export default function CreateOrderPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
+  const steps = [t('orders.stepClient'), t('orders.stepProducts'), t('orders.stepConfirm')];
   const [step, setStep] = useState(1);
 
   // Step 1: Client
@@ -143,7 +144,7 @@ export default function CreateOrderPage() {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6 max-w-3xl mx-auto">
       {/* Header */}
-      <h1 className="text-2xl font-bold">Новый заказ</h1>
+      <h1 className="text-2xl font-bold">{t('orders.newOrder')}</h1>
 
       {/* Step indicator */}
       <div className="flex items-center justify-center gap-2">
@@ -194,7 +195,7 @@ export default function CreateOrderPage() {
                   onClick={() => setSelectedClient(null)}
                   className="text-error text-sm hover:underline cursor-pointer"
                 >
-                  Изменить
+                  {t('common.change')}
                 </button>
               </div>
             </div>
@@ -204,7 +205,7 @@ export default function CreateOrderPage() {
                 <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
                 <input
                   type="text"
-                  placeholder="Поиск клиента по имени, телефону..."
+                  placeholder={t('orders.clientSearch')}
                   value={clientSearch}
                   onChange={(e) => setClientSearch(e.target.value)}
                   className="w-full bg-bg border border-border rounded-lg pl-10 pr-4 py-2.5 text-text focus:outline-none focus:border-gold"
@@ -240,7 +241,7 @@ export default function CreateOrderPage() {
             <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
             <input
               type="text"
-              placeholder="Поиск товара..."
+              placeholder={t('orders.productSearch')}
               value={productSearch}
               onChange={(e) => setProductSearch(e.target.value)}
               className="w-full bg-bg border border-border rounded-lg pl-10 pr-4 py-2.5 text-text focus:outline-none focus:border-gold"
@@ -281,15 +282,15 @@ export default function CreateOrderPage() {
             <div className="bg-card rounded-xl border border-border overflow-hidden">
               <div className="px-4 py-3 border-b border-border flex items-center gap-2">
                 <ShoppingCart size={18} className="text-gold" />
-                <span className="font-bold text-sm">Корзина</span>
+                <span className="font-bold text-sm">{t('orders.cart')}</span>
               </div>
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border">
-                    <th className="text-xs text-muted font-normal uppercase text-left px-4 py-2">Товар</th>
-                    <th className="text-xs text-muted font-normal uppercase text-right px-4 py-2">Цена</th>
-                    <th className="text-xs text-muted font-normal uppercase text-center px-4 py-2">Кол-во</th>
-                    <th className="text-xs text-muted font-normal uppercase text-right px-4 py-2">Итого</th>
+                    <th className="text-xs text-muted font-normal uppercase text-left px-4 py-2">{t('orders.product')}</th>
+                    <th className="text-xs text-muted font-normal uppercase text-right px-4 py-2">{t('orders.price')}</th>
+                    <th className="text-xs text-muted font-normal uppercase text-center px-4 py-2">{t('orders.quantity')}</th>
+                    <th className="text-xs text-muted font-normal uppercase text-right px-4 py-2">{t('orders.total')}</th>
                     <th className="px-4 py-2"></th>
                   </tr>
                 </thead>
@@ -318,7 +319,7 @@ export default function CreateOrderPage() {
                 </tbody>
               </table>
               <div className="px-4 py-3 border-t border-border text-right">
-                <span className="text-muted text-sm">Итого: </span>
+                <span className="text-muted text-sm">{t('orders.total')}: </span>
                 <span className="text-gold font-bold text-lg">{formatNumber(orderTotal)} ₴</span>
               </div>
             </div>
@@ -331,7 +332,7 @@ export default function CreateOrderPage() {
         <div className="space-y-4">
           {/* Client summary */}
           <div className="bg-card rounded-xl border border-border p-5">
-            <p className="text-xs text-muted uppercase mb-2">Клиент</p>
+            <p className="text-xs text-muted uppercase mb-2">{t('orders.stepClient')}</p>
             <p className="font-bold">{selectedClient?.name}</p>
             <p className="text-sm text-muted">{selectedClient?.phone} &middot; {selectedClient?.email}</p>
           </div>
@@ -339,7 +340,7 @@ export default function CreateOrderPage() {
           {/* Items summary */}
           <div className="bg-card rounded-xl border border-border overflow-hidden">
             <div className="px-4 py-3 border-b border-border">
-              <p className="text-xs text-muted uppercase">Товары</p>
+              <p className="text-xs text-muted uppercase">{t('orders.stepProducts')}</p>
             </div>
             {cart.map((item, idx) => (
               <div
@@ -356,7 +357,7 @@ export default function CreateOrderPage() {
               </div>
             ))}
             <div className="px-4 py-3 border-t border-border flex justify-between">
-              <span className="font-bold">Итого</span>
+              <span className="font-bold">{t('orders.total')}</span>
               <span className="text-gold font-bold">{formatNumber(orderTotal)} ₴</span>
             </div>
           </div>
@@ -364,11 +365,11 @@ export default function CreateOrderPage() {
           {/* GinCoin info boxes */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="bg-gold/10 border border-gold/30 rounded-xl p-4">
-              <p className="text-sm text-gold font-medium">Клиенту будет начислено</p>
+              <p className="text-sm text-gold font-medium">{t('orders.gincoinClientWill')}</p>
               <p className="text-2xl font-bold text-gold">{formatNumber(gcClient)} GC</p>
             </div>
             <div className="bg-gold/10 border border-gold/30 rounded-xl p-4">
-              <p className="text-sm text-gold font-medium">Менеджеру будет начислено</p>
+              <p className="text-sm text-gold font-medium">{t('orders.gincoinManagerWill')}</p>
               <p className="text-2xl font-bold text-gold">{formatNumber(gcManager)} GC</p>
             </div>
           </div>
@@ -382,7 +383,7 @@ export default function CreateOrderPage() {
           className="bg-card border border-border text-muted hover:text-text rounded-lg px-4 py-2 flex items-center gap-2 transition-colors cursor-pointer"
         >
           <ArrowLeft size={16} />
-          Назад
+          {t('common.back')}
         </button>
         {step < 3 ? (
           <button
@@ -390,7 +391,7 @@ export default function CreateOrderPage() {
             disabled={!canGoNext()}
             className="bg-gold hover:bg-gold-hover text-white rounded-lg px-4 py-2 flex items-center gap-2 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Далее
+            {t('common.next')}
             <ArrowRight size={16} />
           </button>
         ) : (
@@ -400,7 +401,7 @@ export default function CreateOrderPage() {
             className="bg-gold hover:bg-gold-hover text-white rounded-lg px-6 py-2 flex items-center gap-2 transition-colors cursor-pointer disabled:opacity-50"
           >
             <Check size={16} />
-            {submitting ? 'Оформление...' : 'Оформить заказ'}
+            {submitting ? t('orders.submitting') : t('orders.submit')}
           </button>
         )}
       </div>

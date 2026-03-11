@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../stores/authStore';
+import Particles from '../components/Particles';
 
 export default function LoginPage() {
   const { t } = useTranslation();
@@ -21,19 +22,30 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-bg px-4">
+    <div className="min-h-screen flex items-center justify-center px-4" style={{ background: 'radial-gradient(ellipse at center, #0A0A1A 0%, #050510 100%)' }}>
+      <Particles />
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="w-full max-w-md"
+        className="w-full max-w-md relative z-10"
       >
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gold tracking-wide">MezoClub</h1>
+          <h1
+            className="text-4xl tracking-wide"
+            style={{
+              fontWeight: 800,
+              background: 'linear-gradient(135deg, #B8860B, #FFD700)',
+              WebkitBackgroundClip: 'text',
+              color: 'transparent',
+            }}
+          >
+            MezoClub
+          </h1>
           <p className="text-muted mt-2 text-sm">CRM System</p>
         </div>
 
-        <div className="bg-card rounded-2xl p-8 border border-border shadow-2xl">
+        <div className="glass-card p-8">
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="block text-sm text-muted mb-1.5">{t('auth.email')}</label>
@@ -42,7 +54,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-text focus:outline-none focus:border-gold transition-colors"
+                className="input-glass"
                 placeholder="admin@mezoclub.com"
               />
             </div>
@@ -54,7 +66,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-text focus:outline-none focus:border-gold transition-colors"
+                className="input-glass"
                 placeholder="••••••••"
               />
             </div>
@@ -72,7 +84,8 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gold hover:bg-gold-hover text-white font-semibold py-3 rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
+              className="btn-primary w-full disabled:opacity-50"
+              style={{ padding: '12px 24px' }}
             >
               {isLoading ? '...' : t('auth.login')}
             </button>

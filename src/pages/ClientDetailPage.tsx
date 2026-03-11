@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import {
   ArrowLeft,
@@ -31,6 +32,7 @@ interface Client {
 export default function ClientDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [client, setClient] = useState<Client | null>(null);
   const [loading, setLoading] = useState(true);
@@ -51,7 +53,7 @@ export default function ClientDetailPage() {
   }, [id]);
 
   async function handleDelete() {
-    if (!confirm('Удалить клиента?')) return;
+    if (!confirm(t('client_detail.delete_confirm'))) return;
     setDeleting(true);
     try {
       await api.delete(`/clients/${id}`);
@@ -65,7 +67,7 @@ export default function ClientDetailPage() {
   if (loading) {
     return (
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center justify-center h-64">
-        <div className="text-muted">Загрузка...</div>
+        <div className="text-muted">{t('common.loading')}</div>
       </motion.div>
     );
   }
@@ -73,9 +75,9 @@ export default function ClientDetailPage() {
   if (!client) {
     return (
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-16">
-        <p className="text-muted mb-4">Клиент не найден</p>
+        <p className="text-muted mb-4">{t('client_detail.not_found')}</p>
         <button onClick={() => navigate('/clients')} className="text-gold hover:text-gold-hover transition-colors">
-          Вернуться к списку
+          {t('client_detail.back_to_list')}
         </button>
       </motion.div>
     );
@@ -83,10 +85,10 @@ export default function ClientDetailPage() {
 
   const infoItems = [
     { icon: Mail, label: 'Email', value: client.email },
-    { icon: Phone, label: 'Телефон', value: client.phone },
-    { icon: Building2, label: 'Компания', value: client.company },
-    { icon: Tag, label: 'Сегмент', value: client.segment },
-    { icon: Tag, label: 'Источник', value: client.source },
+    { icon: Phone, label: t('clients.phone'), value: client.phone },
+    { icon: Building2, label: t('clients.company'), value: client.company },
+    { icon: Tag, label: t('client_detail.segment'), value: client.segment },
+    { icon: Tag, label: t('client_detail.source'), value: client.source },
   ];
 
   return (
@@ -98,7 +100,7 @@ export default function ClientDetailPage() {
           className="flex items-center gap-2 text-muted hover:text-text transition-colors"
         >
           <ArrowLeft size={18} />
-          Назад к списку
+          {t('client_detail.back')}
         </button>
         <div className="flex items-center gap-2">
           <button
@@ -106,7 +108,7 @@ export default function ClientDetailPage() {
             className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border text-muted hover:text-text transition-colors"
           >
             <Pencil size={16} />
-            Редактировать
+            {t('client_detail.edit')}
           </button>
           <button
             onClick={handleDelete}
@@ -114,7 +116,7 @@ export default function ClientDetailPage() {
             className="flex items-center gap-2 px-4 py-2 rounded-lg border border-error/50 text-error hover:bg-error/10 transition-colors disabled:opacity-50"
           >
             <Trash2 size={16} />
-            Удалить
+            {t('client_detail.delete')}
           </button>
         </div>
       </div>
@@ -146,10 +148,10 @@ export default function ClientDetailPage() {
         </div>
 
         <div className="mt-4 pt-4 border-t border-border text-sm text-muted">
-          Создан: {new Date(client.created_at).toLocaleDateString('ru-RU')}
+          {t('client_detail.created')}: {new Date(client.created_at).toLocaleDateString('ru-RU')}
           {client.updated_at && (
             <span className="ml-4">
-              Обновлён: {new Date(client.updated_at).toLocaleDateString('ru-RU')}
+              {t('client_detail.updated')}: {new Date(client.updated_at).toLocaleDateString('ru-RU')}
             </span>
           )}
         </div>
@@ -160,10 +162,10 @@ export default function ClientDetailPage() {
         <div className="bg-card rounded-xl border border-border p-6">
           <div className="flex items-center gap-2 mb-4">
             <ShoppingCart size={20} className="text-muted" />
-            <h2 className="text-lg font-semibold">История заказов</h2>
+            <h2 className="text-lg font-semibold">{t('client_detail.orders_history')}</h2>
           </div>
           <div className="text-center py-8 text-muted">
-            <p>История заказов пока недоступна</p>
+            <p>{t('client_detail.orders_unavailable')}</p>
           </div>
         </div>
 
@@ -171,7 +173,7 @@ export default function ClientDetailPage() {
         <div className="bg-card rounded-xl border border-border p-6">
           <div className="flex items-center gap-2 mb-4">
             <Coins size={20} className="text-gold" />
-            <h2 className="text-lg font-semibold">GinCoin баланс</h2>
+            <h2 className="text-lg font-semibold">{t('client_detail.gincoin_balance')}</h2>
           </div>
           <div className="flex items-center gap-4">
             <div className="p-4 rounded-lg bg-bg">
@@ -179,7 +181,7 @@ export default function ClientDetailPage() {
             </div>
             <div>
               <p className="text-3xl font-bold text-gold">{formatNumber(0)} GC</p>
-              <p className="text-sm text-muted">Баланс бонусных монет</p>
+              <p className="text-sm text-muted">{t('client_detail.bonus_balance')}</p>
             </div>
           </div>
         </div>
