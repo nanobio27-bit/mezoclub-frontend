@@ -86,7 +86,7 @@ export default function ClientsPage() {
       {/* Table */}
       <div className="bg-card rounded-xl border border-border overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm min-w-[500px]">
             <thead>
               <tr className="text-muted border-b border-border">
                 <th className="text-left py-3 px-4">{t('clients_page.name')}</th>

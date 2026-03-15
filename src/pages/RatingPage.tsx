@@ -62,7 +62,7 @@ function MiniFlask({ level }: { level: string }) {
   const fillY = 30 - fillHeight;
 
   return (
-    <svg viewBox="0 0 24 36" width="24" height="36" className="flex-shrink-0">
+    <svg viewBox="0 0 24 36" width="14" height="20" className="flex-shrink-0">
       <defs>
         <clipPath id={`miniFlask-${level}`}>
           <path d="M 8 4 L 8 10 Q 2 14 2 20 L 2 28 Q 2 30 4 30 L 20 30 Q 22 30 22 28 L 22 20 Q 22 14 16 10 L 16 4 Z" />
@@ -86,8 +86,8 @@ function RankBadge({ rank }: { rank: number }) {
   let bg = 'rgba(255,255,255,0.1)';
   let textColor = '#ffffff';
   if (rank === 1) {
-    bg = 'linear-gradient(135deg, #B8860B, #FFD700)';
-    textColor = '#000000';
+    bg = 'linear-gradient(135deg, #136579, #1a8a9e)';
+    textColor = '#ffffff';
   } else if (rank === 2) {
     bg = 'linear-gradient(135deg, #808080, #C0C0C0)';
     textColor = '#000000';
@@ -114,7 +114,7 @@ function RankBadge({ rank }: { rank: number }) {
 }
 
 function getRowStyle(rank: number): React.CSSProperties {
-  if (rank === 1) return { background: 'rgba(255,215,0,0.1)', borderLeft: '3px solid #FFD700' };
+  if (rank === 1) return { background: 'rgba(19,101,121,0.1)', borderLeft: '3px solid #136579' };
   if (rank === 2) return { background: 'rgba(192,192,192,0.1)', borderLeft: '3px solid #C0C0C0' };
   if (rank === 3) return { background: 'rgba(205,127,50,0.1)', borderLeft: '3px solid #CD7F32' };
   return {};
@@ -155,9 +155,10 @@ export default function RatingPage() {
             onClick={() => setTab(tabItem.key)}
             className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
               tab === tabItem.key
-                ? 'bg-gradient-to-r from-amber-600 to-yellow-500 text-white'
+                ? 'text-white'
                 : 'btn-secondary'
             }`}
+            style={tab === tabItem.key ? { background: 'linear-gradient(135deg, #136579, #1a8a9e)' } : undefined}
           >
             {t(tabItem.labelKey)}
           </button>
@@ -170,12 +171,12 @@ export default function RatingPage() {
           tilt={false}
           className="p-4"
           style={{
-            border: '2px solid rgba(184,134,11,0.5)',
-            boxShadow: '0 0 20px rgba(184,134,11,0.15)',
+            border: '2px solid rgba(19,101,121,0.5)',
+            boxShadow: '0 0 20px rgba(19,101,121,0.15)',
           }}
         >
           <p className="text-sm text-muted">
-            {t('rating.myPosition')}: <span className="text-gold font-bold text-lg">#{myRank.rank}</span>
+            {t('rating.myPosition')}: <span className="text-[var(--color-accent)] font-bold text-lg">#{myRank.rank}</span>
           </p>
         </GlassCard>
       )}
@@ -184,7 +185,7 @@ export default function RatingPage() {
       {tab === 'managers' && (loading ? <Spinner className="py-12" /> : (
         <GlassCard tilt={false} className="overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-sm min-w-[500px] border-separate border-spacing-y-2">
               <thead>
                 <tr className="table-header">
                   <th className="text-left p-3 font-medium w-16">#</th>
@@ -201,17 +202,25 @@ export default function RatingPage() {
                   return (
                     <tr
                       key={m.id}
-                      className={`table-row-hover ${isCurrentUser ? 'ring-1 ring-gold/30' : ''}`}
+                      className={`table-row-hover ${isCurrentUser ? 'ring-1 ring-[rgba(19,101,121,0.3)]' : ''}`}
                       style={getRowStyle(rank)}
                     >
                       <td className="p-3">
                         <RankBadge rank={rank} />
                       </td>
                       <td className="p-3 font-medium text-text">{m.name}</td>
-                      <td className="p-3 text-right text-gold font-semibold">
-                        {formatNumber(m.monthly_earned)}
+                      <td className="p-3 text-right font-semibold">
+                        <div className="inline-flex items-center gap-2 whitespace-nowrap text-teal">
+                          <MiniFlask level={m.level} />
+                          {formatNumber(m.monthly_earned)}
+                        </div>
                       </td>
-                      <td className="p-3 text-right text-text">{formatNumber(m.total_earned)}</td>
+                      <td className="p-3 text-right text-text">
+                        <div className="inline-flex items-center gap-2 whitespace-nowrap">
+                          <MiniFlask level={m.level} />
+                          {formatNumber(m.total_earned)}
+                        </div>
+                      </td>
                       <td className="p-3">
                         <div className="flex items-center gap-2">
                           <MiniFlask level={m.level} />

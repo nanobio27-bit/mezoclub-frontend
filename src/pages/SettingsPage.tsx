@@ -50,7 +50,7 @@ const ROLE_KEYS: Record<string, string> = {
 };
 
 const ROLE_BADGE: Record<string, string> = {
-  admin: 'bg-gold/20 text-gold',
+  admin: 'bg-[rgba(19,101,121,0.2)] text-[var(--color-accent)]',
   manager: 'bg-blue-500/20 text-blue-400',
   dealer: 'bg-green/20 text-green',
 };
@@ -60,7 +60,6 @@ const ROLE_BADGE: Record<string, string> = {
 export default function SettingsPage() {
   const { t } = useTranslation();
   const user = useAuthStore((s) => s.user);
-  const addToast = useToastStore((s) => s.addToast);
   const isAdmin = user?.role === 'admin';
 
   const [activeTab, setActiveTab] = useState<TabKey>('profile');
@@ -83,9 +82,10 @@ export default function SettingsPage() {
             onClick={() => setActiveTab(tab.key)}
             className={`flex-1 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
               activeTab === tab.key
-                ? 'bg-gold text-bg'
+                ? 'text-white'
                 : 'text-muted hover:text-text'
             }`}
+            style={activeTab === tab.key ? { background: 'linear-gradient(135deg, #136579, #1a8a9e)' } : undefined}
           >
             {tab.label}
           </button>
@@ -180,7 +180,7 @@ function ProfileTab() {
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
               required
-              className="w-full bg-bg border border-border rounded-lg px-4 py-2.5 text-text focus:outline-none focus:border-gold pr-10"
+              className="w-full bg-bg border border-border rounded-lg px-4 py-2.5 text-text focus:outline-none focus:border-[var(--color-accent)] pr-10"
             />
             <button
               type="button"
@@ -200,7 +200,7 @@ function ProfileTab() {
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               required
-              className="w-full bg-bg border border-border rounded-lg px-4 py-2.5 text-text focus:outline-none focus:border-gold pr-10"
+              className="w-full bg-bg border border-border rounded-lg px-4 py-2.5 text-text focus:outline-none focus:border-[var(--color-accent)] pr-10"
             />
             <button
               type="button"
@@ -219,14 +219,14 @@ function ProfileTab() {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
-            className="w-full bg-bg border border-border rounded-lg px-4 py-2.5 text-text focus:outline-none focus:border-gold"
+            className="w-full bg-bg border border-border rounded-lg px-4 py-2.5 text-text focus:outline-none focus:border-[var(--color-accent)]"
           />
         </div>
 
         <button
           type="submit"
           disabled={loading}
-          className="bg-gold text-bg px-6 py-2.5 rounded-lg font-medium hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2"
+          className="btn-primary disabled:opacity-50 flex items-center gap-2"
         >
           {loading ? <Spinner size="sm" /> : <Save size={16} />}
           {t('common.save')}
@@ -342,7 +342,7 @@ function UsersTab() {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -12 }}
-      className="space-y-4"
+      className="space-y-6"
     >
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold text-text">{t('settings.users')} ({formatNumber(users.length)})</h2>
@@ -351,7 +351,7 @@ function UsersTab() {
             setShowAddForm(!showAddForm);
             setEditingId(null);
           }}
-          className="bg-gold text-bg px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity flex items-center gap-2"
+          className="btn-primary text-sm flex items-center gap-2"
         >
           {showAddForm ? <X size={16} /> : <Plus size={16} />}
           {showAddForm ? t('common.cancel') : t('common.add')}
@@ -376,7 +376,7 @@ function UsersTab() {
                   value={addName}
                   onChange={(e) => setAddName(e.target.value)}
                   required
-                  className="w-full bg-bg border border-border rounded-lg px-4 py-2 text-text focus:outline-none focus:border-gold"
+                  className="w-full bg-bg border border-border rounded-lg px-4 py-2 text-text focus:outline-none focus:border-[var(--color-accent)]"
                 />
               </div>
               <div>
@@ -386,7 +386,7 @@ function UsersTab() {
                   value={addEmail}
                   onChange={(e) => setAddEmail(e.target.value)}
                   required
-                  className="w-full bg-bg border border-border rounded-lg px-4 py-2 text-text focus:outline-none focus:border-gold"
+                  className="w-full bg-bg border border-border rounded-lg px-4 py-2 text-text focus:outline-none focus:border-[var(--color-accent)]"
                 />
               </div>
               <div>
@@ -396,7 +396,7 @@ function UsersTab() {
                   value={addPassword}
                   onChange={(e) => setAddPassword(e.target.value)}
                   required
-                  className="w-full bg-bg border border-border rounded-lg px-4 py-2 text-text focus:outline-none focus:border-gold"
+                  className="w-full bg-bg border border-border rounded-lg px-4 py-2 text-text focus:outline-none focus:border-[var(--color-accent)]"
                 />
               </div>
               <div>
@@ -404,7 +404,7 @@ function UsersTab() {
                 <select
                   value={addRole}
                   onChange={(e) => setAddRole(e.target.value)}
-                  className="w-full bg-bg border border-border rounded-lg px-4 py-2 text-text focus:outline-none focus:border-gold"
+                  className="w-full bg-bg border border-border rounded-lg px-4 py-2 text-text focus:outline-none focus:border-[var(--color-accent)]"
                 >
                   <option value="admin">{t('settings.admin')}</option>
                   <option value="manager">{t('settings.manager')}</option>
@@ -415,7 +415,7 @@ function UsersTab() {
             <button
               type="submit"
               disabled={addLoading}
-              className="bg-gold text-bg px-5 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2"
+              className="btn-primary text-sm disabled:opacity-50 flex items-center gap-2"
             >
               {addLoading ? <Spinner size="sm" /> : <Plus size={16} />}
               {t('common.create')}
@@ -426,7 +426,7 @@ function UsersTab() {
 
       {/* Users table */}
       <div className="bg-card rounded-xl border border-border overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full text-sm min-w-[500px]">
           <thead>
             <tr className="border-b border-border text-muted">
               <th className="text-left px-4 py-3 font-medium">{t('settings.name')}</th>
@@ -445,21 +445,21 @@ function UsersTab() {
                     <input
                       value={editName}
                       onChange={(e) => setEditName(e.target.value)}
-                      className="w-full bg-bg border border-border rounded px-2 py-1 text-text text-sm focus:outline-none focus:border-gold"
+                      className="w-full bg-bg border border-border rounded px-2 py-1 text-text text-sm focus:outline-none focus:border-[var(--color-accent)]"
                     />
                   </td>
                   <td className="px-4 py-2">
                     <input
                       value={editEmail}
                       onChange={(e) => setEditEmail(e.target.value)}
-                      className="w-full bg-bg border border-border rounded px-2 py-1 text-text text-sm focus:outline-none focus:border-gold"
+                      className="w-full bg-bg border border-border rounded px-2 py-1 text-text text-sm focus:outline-none focus:border-[var(--color-accent)]"
                     />
                   </td>
                   <td className="px-4 py-2">
                     <select
                       value={editRole}
                       onChange={(e) => setEditRole(e.target.value)}
-                      className="bg-bg border border-border rounded px-2 py-1 text-text text-sm focus:outline-none focus:border-gold"
+                      className="bg-bg border border-border rounded px-2 py-1 text-text text-sm focus:outline-none focus:border-[var(--color-accent)]"
                     >
                       <option value="admin">{t('settings.admin')}</option>
                       <option value="manager">{t('settings.manager')}</option>
@@ -472,7 +472,7 @@ function UsersTab() {
                         type="checkbox"
                         checked={editActive}
                         onChange={(e) => setEditActive(e.target.checked)}
-                        className="accent-gold w-4 h-4"
+                        className="accent-[#136579] w-4 h-4"
                       />
                       <span className="text-sm text-text">{editActive ? t('common.active') : t('common.inactive')}</span>
                     </label>
@@ -523,7 +523,7 @@ function UsersTab() {
                   <td className="px-4 py-3 text-right">
                     <button
                       onClick={() => startEdit(u)}
-                      className="text-gold hover:opacity-80 text-sm font-medium"
+                      className="text-[var(--color-accent)] hover:opacity-80 text-sm font-medium"
                     >
                       {t('common.change')}
                     </button>
@@ -619,7 +619,7 @@ function KpiTargetsTab() {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -12 }}
-      className="space-y-4"
+      className="space-y-6"
     >
       <div className="bg-card rounded-xl border border-border p-6 space-y-4">
         <h2 className="text-lg font-semibold text-text">{t('settings.kpiTargetsTitle')}</h2>
@@ -629,7 +629,7 @@ function KpiTargetsTab() {
           <select
             value={selectedManager ?? ''}
             onChange={(e) => setSelectedManager(e.target.value ? Number(e.target.value) : null)}
-            className="w-full sm:w-72 bg-bg border border-border rounded-lg px-4 py-2.5 text-text focus:outline-none focus:border-gold"
+            className="w-full sm:w-72 bg-bg border border-border rounded-lg px-4 py-2.5 text-text focus:outline-none focus:border-[var(--color-accent)]"
           >
             <option value="">{t('settings.selectManager')}</option>
             {managers.map((m) => (
@@ -647,14 +647,15 @@ function KpiTargetsTab() {
             <Spinner className="py-12" />
           ) : (
             <>
-              <table className="w-full text-sm">
-                <thead>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm min-w-[500px]">
+                  <thead>
                   <tr className="border-b border-border text-muted">
                     <th className="text-left px-4 py-3 font-medium">{t('settings.metric')}</th>
                     <th className="text-left px-4 py-3 font-medium">{t('settings.targetValue')}</th>
                   </tr>
-                </thead>
-                <tbody>
+                  </thead>
+                  <tbody>
                   {DEFAULT_METRICS.map((metric) => (
                     <tr key={metric} className="border-b border-border">
                       <td className="px-4 py-3 text-text">{t(METRIC_KEYS[metric])}</td>
@@ -669,19 +670,20 @@ function KpiTargetsTab() {
                             }))
                           }
                           min={0}
-                          className="w-40 bg-bg border border-border rounded-lg px-3 py-1.5 text-text text-sm focus:outline-none focus:border-gold"
+                          className="w-40 bg-bg border border-border rounded-lg px-3 py-1.5 text-text text-sm focus:outline-none focus:border-[var(--color-accent)]"
                         />
                       </td>
                     </tr>
                   ))}
-                </tbody>
-              </table>
+                  </tbody>
+                </table>
+              </div>
 
               <div className="px-4 py-4 border-t border-border">
                 <button
                   onClick={() => void handleSaveAll()}
                   disabled={saving}
-                  className="bg-gold text-bg px-6 py-2.5 rounded-lg font-medium hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2"
+                  className="btn-primary disabled:opacity-50 flex items-center gap-2"
                 >
                   {saving ? <Spinner size="sm" /> : <Save size={16} />}
                   {t('settings.saveAll')}

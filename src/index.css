@@ -1,3 +1,4 @@
+@import url('https://fonts.cdnfonts.com/css/museo-sans-cyrl');
 @import "tailwindcss";
 @import "@fontsource/inter/400.css";
 @import "@fontsource/inter/500.css";
@@ -6,19 +7,22 @@
 @import "@fontsource/inter/800.css";
 
 @theme {
-  --color-bg: #0A0A1A;
-  --color-card: #1A1A2E;
-  --color-sidebar: #111128;
+  --color-bg: #050510;
+  --color-card: rgba(20,18,42,0.9);
+  --color-sidebar: rgba(12,10,30,0.96);
+  --color-accent: #136579;
+  --color-accent-light: #1a8a9e;
+  --color-accent-glow: rgba(19,101,121,0.3);
   --color-gold: #B8860B;
-  --color-gold-hover: #D4A017;
+  --color-gold-hover: #FFD700;
   --color-green: #2E7D32;
   --color-green-hover: #388E3C;
   --color-text: #E0E0E0;
   --color-muted: #888888;
   --color-error: #EF4444;
-  --color-border: #2A2A3E;
+  --color-border: rgba(255,255,255,0.06);
   --color-teal: #00D4AA;
-  --font-sans: "Inter", system-ui, sans-serif;
+  --font-sans: "Museo Sans Cyrl", "Inter", system-ui, sans-serif;
 }
 
 * {
@@ -29,7 +33,11 @@
 
 body {
   font-family: var(--font-sans);
-  background: radial-gradient(ellipse at center, #0A0A1A 0%, #050510 100%);
+  background:
+    radial-gradient(ellipse at 20% 15%, rgba(19,101,121,0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 60%, rgba(19,101,121,0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 90%, rgba(0,212,170,0.06) 0%, transparent 40%),
+    #050510;
   color: var(--color-text);
   min-height: 100vh;
 }
@@ -42,16 +50,18 @@ body {
 
 /* Glassmorphism card base */
 .glass-card {
-  background: rgba(26, 26, 46, 0.6);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(135deg, rgba(20,18,42,0.9), rgba(30,25,60,0.8));
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255,255,255,0.08);
   border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04);
+  transition: all 0.3s ease;
 }
 .glass-card:hover {
-  box-shadow: 0 8px 32px rgba(184, 134, 11, 0.15);
+  border-color: rgba(19,101,121,0.25);
+  box-shadow: 0 8px 40px rgba(19,101,121,0.12), 0 0 60px rgba(19,101,121,0.05);
+  transform: translateY(-2px);
 }
 
 /* Inputs */
@@ -67,14 +77,14 @@ body {
 }
 .input-glass::placeholder { color: var(--color-muted); }
 .input-glass:focus {
-  border-color: var(--color-gold);
-  box-shadow: 0 0 0 3px rgba(184,134,11,0.1);
+  border-color: rgba(19,101,121,0.5);
+  box-shadow: 0 0 0 3px rgba(19,101,121,0.1);
 }
 
 /* Primary button */
 .btn-primary {
-  background: linear-gradient(135deg, #B8860B, #D4A017);
-  color: #000;
+  background: linear-gradient(135deg, #136579, #1a8a9e);
+  color: #fff;
   font-weight: 600;
   padding: 10px 24px;
   border-radius: 10px;
@@ -84,7 +94,7 @@ body {
 }
 .btn-primary:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 20px rgba(184,134,11,0.4);
+  box-shadow: 0 4px 20px rgba(19,101,121,0.4);
 }
 .btn-primary:active { transform: translateY(0); }
 
@@ -134,3 +144,19 @@ body {
 .table-row-hover:hover {
   background: rgba(255,255,255,0.03);
 }
+
+/* Nebula blobs */
+.nebula-blob { position:fixed; border-radius:50%; filter:blur(80px); pointer-events:none; z-index:0; animation:nebulaDrift 25s ease-in-out infinite }
+.nebula-blob-1 { top:5%;right:15%;width:400px;height:400px;background:radial-gradient(circle,rgba(19,101,121,0.20),transparent 70%) }
+.nebula-blob-2 { bottom:20%;left:20%;width:350px;height:350px;background:radial-gradient(circle,rgba(19,101,121,0.12),transparent 70%);animation-direction:reverse;animation-duration:30s }
+.nebula-blob-3 { top:50%;right:40%;width:300px;height:300px;background:radial-gradient(circle,rgba(0,212,170,0.10),transparent 70%);animation-duration:35s }
+@keyframes nebulaDrift { 0%{transform:translate(0,0)} 33%{transform:translate(30px,-25px)} 66%{transform:translate(-20px,20px)} 100%{transform:translate(0,0)} }
+
+/* Stars */
+.star { position:absolute;border-radius:50%;background:rgba(255,255,255,0.4);animation:starPulse ease-in-out infinite }
+@keyframes starPulse { 0%,100%{opacity:0.15;transform:scale(1)} 50%{opacity:0.7;transform:scale(1.4)} }
+
+/* AI dots */
+.ai-dot-online { width:7px;height:7px;border-radius:50%;background:#34d399;box-shadow:0 0 6px rgba(52,211,153,0.5) }
+.ai-dot-thinking { width:7px;height:7px;border-radius:50%;background:#fbbf24;box-shadow:0 0 6px rgba(251,191,36,0.5);animation:glowPulse 2s infinite }
+@keyframes glowPulse { 0%,100%{opacity:0.4} 50%{opacity:1} }

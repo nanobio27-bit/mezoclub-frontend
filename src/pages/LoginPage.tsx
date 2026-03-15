@@ -35,7 +35,7 @@ export default function LoginPage() {
             className="text-4xl tracking-wide"
             style={{
               fontWeight: 800,
-              background: 'linear-gradient(135deg, #B8860B, #FFD700)',
+              background: 'linear-gradient(135deg, #136579, #1a8a9e)',
               WebkitBackgroundClip: 'text',
               color: 'transparent',
             }}

@@ -1,17 +1,19 @@
 export default function Particles() {
-  const particles = Array.from({ length: 60 }, (_, i) => {
+  const stars = Array.from({ length: 50 }, (_, i) => {
     const size = 1 + Math.random() * 2;
     const left = Math.random() * 100;
-    const delay = Math.random() * 20;
-    const duration = 15 + Math.random() * 25;
+    const top = Math.random() * 100;
+    const duration = 3 + Math.random() * 4;
+    const delay = Math.random() * 5;
     return (
       <div
         key={i}
-        className="particle"
+        className="star"
         style={{
           width: size,
           height: size,
           left: `${left}%`,
+          top: `${top}%`,
           animationDuration: `${duration}s`,
           animationDelay: `${delay}s`,
         }}
@@ -19,5 +21,14 @@ export default function Particles() {
     );
   });
 
-  return <div className="particles-container">{particles}</div>;
+  return (
+    <>
+      <div className="particles-container">
+        {stars}
+      </div>
+      <div className="nebula-blob nebula-blob-1" />
+      <div className="nebula-blob nebula-blob-2" />
+      <div className="nebula-blob nebula-blob-3" />
+    </>
+  );
 }

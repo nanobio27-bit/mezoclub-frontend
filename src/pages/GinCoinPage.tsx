@@ -345,7 +345,7 @@ export default function GinCoinPage() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm min-w-[500px]">
             <thead>
               <tr className="table-header">
                 <th className="text-left p-3 font-medium">{t('gincoin.date')}</th>
@@ -400,9 +400,10 @@ export default function GinCoinPage() {
                 onClick={() => setTxPage(p)}
                 className={`w-9 h-9 rounded-lg text-sm transition-colors cursor-pointer ${
                   txPage === p
-                    ? 'bg-gradient-to-r from-amber-600 to-yellow-500 text-white'
+                    ? 'text-white'
                     : 'bg-bg border border-border text-muted hover:text-text'
                 }`}
+                style={txPage === p ? { background: 'linear-gradient(135deg, #136579, #1a8a9e)' } : undefined}
               >
                 {p}
               </button>

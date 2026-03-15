@@ -58,14 +58,12 @@ interface Manager {
 type IncrementType = 'meeting' | 'call' | 'seminar' | 'lead';
 
 function getProgressColor(pct: number): string {
-  if (pct >= 100) return '#00D4AA';
-  if (pct >= 50) return '#F1C40F';
-  return '#E74C3C';
+  if (pct >= 50) return '#136579';
+  return '#EF4444';
 }
 
 function progressTextColor(pct: number): string {
-  if (pct >= 100) return 'text-green';
-  if (pct >= 50) return 'text-yellow-500';
+  if (pct >= 50) return 'text-[var(--color-accent)]';
   return 'text-error';
 }
 
@@ -85,12 +83,12 @@ function MetricCard({ label, actual, target, formatValue, suffix, index = 0 }: M
   const color = getProgressColor(pct);
 
   return (
-    <GlassCard tilt index={index} className="p-5">
+    <GlassCard tilt index={index} className="p-5 h-full flex flex-col justify-between min-h-[140px]">
       <p className="text-muted text-xs mb-1">{label}</p>
       <p className="text-lg font-semibold">
         {display}{suffix ?? ''} <span className="text-muted text-sm font-normal">/ {targetDisplay}{suffix ?? ''}</span>
       </p>
-      <div className="mt-3 h-1.5 rounded-full bg-bg overflow-hidden">
+              <div className="mt-3 h-1.5 rounded-full bg-bg overflow-hidden">
         <motion.div
           className="h-full rounded-full"
           style={{
@@ -255,9 +253,10 @@ export default function KpiPage() {
               onClick={() => handleSelectManager(m.id)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
                 selectedManagerId === m.id
-                  ? 'bg-gradient-to-r from-amber-600 to-yellow-500 text-white'
+                  ? 'text-white'
                   : 'btn-secondary'
               }`}
+              style={selectedManagerId === m.id ? { background: 'linear-gradient(135deg, #136579, #1a8a9e)' } : undefined}
             >
               {m.name}
             </button>
@@ -332,7 +331,7 @@ export default function KpiPage() {
       </div>
 
       {/* KPI metric cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 auto-rows-fr">
         {metrics.map((m, i) => (
           <MetricCard
             key={m.label}

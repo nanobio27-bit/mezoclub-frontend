@@ -29,10 +29,11 @@ const STATUS_KEYS: Record<string, string> = {
 };
 
 const statusStyles: Record<string, { bg: string; color: string }> = {
-  new: { bg: 'rgba(74,144,217,0.15)', color: '#4A90D9' },
-  processing: { bg: 'rgba(241,196,15,0.15)', color: '#F1C40F' },
+  new: { bg: 'rgba(19,101,121,0.15)', color: '#136579' },
+  processing: { bg: 'rgba(251,191,36,0.15)', color: '#fbbf24' },
+  pending: { bg: 'rgba(251,191,36,0.15)', color: '#fbbf24' },
   completed: { bg: 'rgba(0,212,170,0.15)', color: '#00D4AA' },
-  cancelled: { bg: 'rgba(231,76,60,0.15)', color: '#E74C3C' },
+  cancelled: { bg: 'rgba(239,68,68,0.15)', color: '#EF4444' },
 };
 
 const PAYMENT_KEYS: Record<string, string> = {
@@ -115,9 +116,10 @@ export default function OrdersPage() {
             onClick={() => setStatus(opt.value)}
             className={`px-4 py-2 rounded-lg text-sm transition-colors cursor-pointer ${
               status === opt.value
-                ? 'bg-gradient-to-r from-amber-600 to-yellow-500 text-white font-medium'
+                ? 'text-white font-medium'
                 : 'btn-secondary'
             }`}
+            style={status === opt.value ? { background: 'linear-gradient(135deg, #136579, #1a8a9e)' } : undefined}
           >
             {t(opt.labelKey)}
           </button>
@@ -129,7 +131,7 @@ export default function OrdersPage() {
       {orders.length > 0 ? (
         <GlassCard tilt={false} className="overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-sm min-w-[500px]">
               <thead>
                 <tr className="table-header">
                   <th className="text-left px-4 py-3 font-medium">№</th>
@@ -150,7 +152,7 @@ export default function OrdersPage() {
                     >
                       <td className="px-4 py-3 font-medium">{order.id}</td>
                       <td className="px-4 py-3">{order.client?.name || t('orders.clientFallback', { id: order.client_id })}</td>
-                      <td className="px-4 py-3 text-right font-medium">{formatNumber(order.total_amount)}</td>
+                      <td className="px-4 py-3 text-right font-medium whitespace-nowrap">{formatNumber(order.total_amount)}</td>
                       <td className="px-4 py-3">
                         <span
                           className="px-2.5 py-1 rounded-full text-xs font-medium"
@@ -162,7 +164,7 @@ export default function OrdersPage() {
                       <td className="px-4 py-3 text-muted">
                         {t(PAYMENT_KEYS[order.payment_status]) || order.payment_status}
                       </td>
-                      <td className="px-4 py-3 text-muted">{formatDate(order.created_at)}</td>
+                      <td className="px-4 py-3 text-muted whitespace-nowrap">{formatDate(order.created_at)}</td>
                     </tr>
                   );
                 })}
@@ -186,9 +188,10 @@ export default function OrdersPage() {
               onClick={() => setPage(p)}
               className={`w-9 h-9 rounded-lg text-sm transition-colors cursor-pointer ${
                 page === p
-                  ? 'bg-gradient-to-r from-amber-600 to-yellow-500 text-white'
+                  ? 'text-white'
                   : 'bg-bg border border-border text-muted hover:text-text'
               }`}
+              style={page === p ? { background: 'linear-gradient(135deg, #136579, #1a8a9e)' } : undefined}
             >
               {p}
             </button>

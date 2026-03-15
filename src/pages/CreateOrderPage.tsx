@@ -284,8 +284,9 @@ export default function CreateOrderPage() {
                 <ShoppingCart size={18} className="text-gold" />
                 <span className="font-bold text-sm">{t('orders.cart')}</span>
               </div>
-              <table className="w-full text-sm">
-                <thead>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm min-w-[500px]">
+                  <thead>
                   <tr className="border-b border-border">
                     <th className="text-xs text-muted font-normal uppercase text-left px-4 py-2">{t('orders.product')}</th>
                     <th className="text-xs text-muted font-normal uppercase text-right px-4 py-2">{t('orders.price')}</th>
@@ -293,8 +294,8 @@ export default function CreateOrderPage() {
                     <th className="text-xs text-muted font-normal uppercase text-right px-4 py-2">{t('orders.total')}</th>
                     <th className="px-4 py-2"></th>
                   </tr>
-                </thead>
-                <tbody>
+                  </thead>
+                  <tbody>
                   {cart.map((item, idx) => (
                     <tr
                       key={item.product.id}
@@ -316,8 +317,9 @@ export default function CreateOrderPage() {
                       </td>
                     </tr>
                   ))}
-                </tbody>
-              </table>
+                  </tbody>
+                </table>
+              </div>
               <div className="px-4 py-3 border-t border-border text-right">
                 <span className="text-muted text-sm">{t('orders.total')}: </span>
                 <span className="text-gold font-bold text-lg">{formatNumber(orderTotal)} ₴</span>

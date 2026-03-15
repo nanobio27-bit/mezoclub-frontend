@@ -144,7 +144,7 @@ export default function DashboardPage() {
       prefix: '₴ ',
       suffix: '',
       icon: TrendingUp,
-      gradient: 'linear-gradient(135deg, #B8860B, #FFD700)',
+      gradient: 'linear-gradient(135deg, #136579, #1a8a9e)',
     },
   ];
 
@@ -186,7 +186,7 @@ export default function DashboardPage() {
       className="space-y-6"
     >
       {/* Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 pt-4">
+      <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
         {statCards.map((c, i) => (
           <GlassCard key={i} index={i} tilt className="p-5 flex items-center gap-4">
             <div
@@ -263,7 +263,7 @@ export default function DashboardPage() {
         <GlassCard tilt={false} className="p-5">
           <h2 className="text-base font-semibold mb-3">{t('dashboard_page.recent_orders')}</h2>
           <div className="overflow-x-auto -mx-5 px-5">
-            <table className="w-full text-sm min-w-[400px]">
+            <table className="w-full text-sm min-w-[500px]">
               <thead>
                 <tr>
                   <th className="table-header text-left py-2 pr-3">ID</th>
@@ -279,7 +279,7 @@ export default function DashboardPage() {
                   <tr key={o.id} className="table-row-hover border-b border-border/40">
                     <td className="py-2.5 pr-3 text-muted">#{o.id}</td>
                     <td className="py-2.5 pr-3">{o.client_name || '—'}</td>
-                    <td className="py-2.5 pr-3 text-right text-gold whitespace-nowrap">₴ {formatNumber(o.total_amount)}</td>
+                    <td className="py-2.5 pr-3 text-right text-teal whitespace-nowrap">₴ {formatNumber(o.total_amount)}</td>
                     <td className="py-2.5">{statusBadge(o.status)}</td>
                   </tr>
                 ))}
@@ -292,7 +292,7 @@ export default function DashboardPage() {
         <GlassCard tilt={false} className="p-5">
           <h2 className="text-base font-semibold mb-3">{t('dashboard_page.top_clients')}</h2>
           <div className="overflow-x-auto -mx-5 px-5">
-            <table className="w-full text-sm min-w-[400px]">
+            <table className="w-full text-sm min-w-[500px]">
               <thead>
                 <tr>
                   <th className="table-header text-left py-2 pr-3">{t('clients.name')}</th>
@@ -309,7 +309,7 @@ export default function DashboardPage() {
                     <td className="py-2.5 pr-3">{c.name}</td>
                     <td className="py-2.5 pr-3 text-muted">{c.company || '—'}</td>
                     <td className="py-2.5 pr-3 text-right">{c.order_count}</td>
-                    <td className="py-2.5 text-right text-gold whitespace-nowrap">₴ {formatNumber(c.total_spent)}</td>
+                    <td className="py-2.5 text-right text-teal whitespace-nowrap">₴ {formatNumber(c.total_spent)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -319,7 +319,7 @@ export default function DashboardPage() {
       </div>
 
       {/* GinCoin Balance */}
-      <GlassCard tilt={false} className="p-5 flex items-center gap-4">
+      <GlassCard tilt={false} className="p-5 flex items-center gap-4 mt-6">
         <div
           style={{
             background: 'linear-gradient(135deg, #B8860B, #FFD700)',

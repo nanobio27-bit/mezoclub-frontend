@@ -18,14 +18,14 @@ export default function Spinner({ size = 'md', className = '' }: SpinnerProps) {
           width: s,
           height: s,
           borderRadius: '50%',
-          background: 'linear-gradient(135deg, #B8860B, #FFD700)',
-          boxShadow: '0 0 20px rgba(184,134,11,0.4)',
+          background: 'linear-gradient(135deg, #136579, #1a8a9e)',
+          boxShadow: '0 0 20px rgba(19,101,121,0.4)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           fontSize: s * 0.45,
           fontWeight: 800,
-          color: '#000',
+          color: '#fff',
         }}
       >
         G

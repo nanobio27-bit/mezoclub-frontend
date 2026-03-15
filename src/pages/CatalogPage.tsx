@@ -81,7 +81,7 @@ export default function CatalogPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <h1 className="text-2xl font-bold">{t('catalog.productsTitle')}</h1>
         {user?.role === 'admin' && (
-          <button className="bg-gold hover:bg-gold-hover text-white rounded-lg px-4 py-2 flex items-center gap-2 transition-colors cursor-pointer">
+          <button className="btn-primary flex items-center gap-2">
             <Plus size={18} />
             {t('catalog.add')}
           </button>
@@ -110,14 +110,14 @@ export default function CatalogPage() {
             style={
               brand === cat.value
                 ? {
-                    background: 'linear-gradient(135deg, #B8860B, #FFD700)',
+                    background: 'linear-gradient(135deg, #136579, #1a8a9e)',
                     color: '#fff',
                     padding: '8px 16px',
                     borderRadius: 8,
                     fontSize: 14,
                     fontWeight: 600,
                     border: 'none',
-                    boxShadow: '0 4px 15px rgba(184,134,11,0.3)',
+                    boxShadow: '0 4px 15px rgba(19,101,121,0.3)',
                     transition: 'all 0.2s',
                   }
                 : {
@@ -161,15 +161,15 @@ export default function CatalogPage() {
                 {/* Badges row */}
                 <div className="flex flex-wrap items-center gap-2">
                   {product.brand && (
-                    <span className="btn-secondary px-2.5 py-1 rounded-full text-xs font-medium">
+                    <span className="px-2.5 py-1 rounded-full text-xs font-medium border border-white/10 bg-[rgba(255,255,255,0.06)] text-muted">
                       {product.brand}
                     </span>
                   )}
                   {product.price > 1000 && (
                     <span
                       style={{
-                        background: 'linear-gradient(135deg, #B8860B, #FFD700)',
-                        color: '#000',
+                        background: 'linear-gradient(135deg, #136579, #1a8a9e)',
+                        color: '#fff',
                         fontSize: 11,
                         fontWeight: 600,
                         borderRadius: 9999,
@@ -216,7 +216,7 @@ export default function CatalogPage() {
               style={
                 page === p
                   ? {
-                      background: 'linear-gradient(135deg, #B8860B, #FFD700)',
+                      background: 'linear-gradient(135deg, #136579, #1a8a9e)',
                       color: '#fff',
                       width: 36,
                       height: 36,

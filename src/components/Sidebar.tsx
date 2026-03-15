@@ -44,7 +44,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
       animate={{ width: collapsed ? 72 : 260 }}
       transition={{ duration: 0.2 }}
       style={{
-        background: 'rgba(17, 17, 40, 0.8)',
+        background: 'rgba(12,10,30,0.96)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
       }}
@@ -55,19 +55,32 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
         className="flex items-center justify-between border-b border-border"
         style={{ height: 64, paddingLeft: collapsed ? 16 : 20, paddingRight: 16, marginBottom: 24 }}
       >
-        {!collapsed && (
-          <span
+        <div className="flex items-center gap-3">
+          <div
+            className="flex items-center justify-center text-white font-bold"
             style={{
-              fontSize: 22,
-              fontWeight: 800,
-              background: 'linear-gradient(135deg, #B8860B, #FFD700)',
-              WebkitBackgroundClip: 'text',
-              color: 'transparent',
+              width: 32,
+              height: 32,
+              borderRadius: 10,
+              background: 'linear-gradient(135deg, #136579, #1a8a9e)',
             }}
           >
-            MezoClub
-          </span>
-        )}
+            M
+          </div>
+          {!collapsed && (
+            <span
+              style={{
+                fontSize: 22,
+                fontWeight: 800,
+                background: 'linear-gradient(135deg, #136579, #1a8a9e)',
+                WebkitBackgroundClip: 'text',
+                color: 'transparent',
+              }}
+            >
+              MezoClub
+            </span>
+          )}
+        </div>
         <button
           onClick={onToggle}
           className="p-1.5 rounded-lg transition-colors text-muted hover:text-text cursor-pointer"
@@ -88,9 +101,9 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
             style={({ isActive }) => ({
               fontSize: 14,
               fontWeight: isActive ? 500 : 400,
-              color: isActive ? '#B8860B' : undefined,
-              backgroundColor: isActive ? 'rgba(184,134,11,0.12)' : 'transparent',
-              borderLeft: isActive ? '3px solid #B8860B' : '3px solid transparent',
+              color: isActive ? '#136579' : undefined,
+              backgroundColor: isActive ? 'rgba(19,101,121,0.12)' : 'transparent',
+              borderLeft: isActive ? '3px solid #136579' : '3px solid transparent',
               paddingLeft: 20,
             })}
             className={({ isActive }) =>
@@ -105,7 +118,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
             }}
             onMouseLeave={(e) => {
               const isActive = e.currentTarget.getAttribute('aria-current') === 'page';
-              e.currentTarget.style.backgroundColor = isActive ? 'rgba(184,134,11,0.12)' : 'transparent';
+              e.currentTarget.style.backgroundColor = isActive ? 'rgba(19,101,121,0.12)' : 'transparent';
             }}
           >
             <item.icon size={20} className="shrink-0" />
@@ -117,6 +130,25 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
           </NavLink>
         ))}
       </nav>
+
+      {/* AI Assistants */}
+      {!collapsed && (
+        <div className="px-4 pb-3">
+          <p className="text-[9.5px] uppercase tracking-widest text-muted mb-2">AI ASSISTANTS</p>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <div className="ai-dot-online" />
+              <span className="text-sm text-text">Rocco</span>
+              <span className="text-[10px] text-muted ml-auto">онлайн</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="ai-dot-thinking" />
+              <span className="text-sm text-text">Teya</span>
+              <span className="text-[10px] text-muted ml-auto">думає...</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Logout */}
       <div className="p-2 border-t border-border">
