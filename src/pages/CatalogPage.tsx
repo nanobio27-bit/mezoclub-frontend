@@ -90,14 +90,13 @@ export default function CatalogPage() {
 
       {/* Search */}
       <div className="relative">
-        <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
+        <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
         <input
           type="text"
           placeholder={t('catalog.search')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="input-glass pr-4 py-2.5"
-          style={{ paddingLeft: '2.5rem' }}
+          className="input-glass pl-10 pr-4 py-2.5"
         />
       </div>
 
@@ -143,7 +142,7 @@ export default function CatalogPage() {
         <Spinner className="py-12" />
       ) : (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
             {products.map((product, i) => (
               <GlassCard key={product.id} index={i} tilt className="p-4 flex flex-col gap-3">
                 {/* Placeholder image */}

@@ -186,7 +186,7 @@ export default function DashboardPage() {
       className="space-y-6"
     >
       {/* Stat Cards */}
-      <div className="grid grid-cols-2 xl:grid-cols-4 gap-5 mb-6">
+      <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
         {statCards.map((c, i) => (
           <GlassCard key={i} index={i} tilt className="p-5 flex items-center gap-4">
             <div

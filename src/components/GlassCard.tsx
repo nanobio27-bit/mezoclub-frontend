@@ -20,8 +20,8 @@ export default function GlassCard({ children, className = '', index = 0, tilt = 
     const y = e.clientY - rect.top;
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
-    const rotateY = ((x - centerX) / centerX) * 2;
-    const rotateX = -((y - centerY) / centerY) * 2;
+    const rotateY = ((x - centerX) / centerX) * 4;
+    const rotateX = -((y - centerY) / centerY) * 4;
     setTransform(`perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`);
   }
 
@@ -36,7 +36,7 @@ export default function GlassCard({ children, className = '', index = 0, tilt = 
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: index * 0.1 }}
       className={`glass-card ${className}`}
-      style={{ transform, transition: 'transform 0.3s ease', position: 'relative', zIndex: 0, ...style }}
+      style={{ transform, transition: 'transform 0.3s ease', ...style }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >

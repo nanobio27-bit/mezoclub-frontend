@@ -50,20 +50,18 @@ body {
 
 /* Glassmorphism card base */
 .glass-card {
-  position: relative;
   background: linear-gradient(135deg, rgba(20,18,42,0.9), rgba(30,25,60,0.8));
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 16px;
   box-shadow: 0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04);
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
-  margin-bottom: 4px;
+  transition: all 0.3s ease;
 }
 .glass-card:hover {
-  z-index: 1;
   border-color: rgba(19,101,121,0.25);
   box-shadow: 0 8px 40px rgba(19,101,121,0.12), 0 0 60px rgba(19,101,121,0.05);
+  transform: translateY(-2px);
 }
 
 /* Inputs */
