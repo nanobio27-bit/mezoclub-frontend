@@ -104,7 +104,9 @@
     "stepConfirm": "Підтвердження",
     "submitting": "Оформлення...",
     "submit": "Оформити замовлення",
-    "clientFallback": "Клієнт #{{id}}"
+    "clientFallback": "Клієнт #{{id}}",
+    "discount": "Знижка",
+    "subtotal": "Підсумок без знижки"
   },
   "gincoin": {
     "title": "Мій Глечик",
@@ -248,6 +250,10 @@
     "metricMeetings": "Зустрічі",
     "metricSeminars": "Семінари",
     "metricLeads": "Ліди"
+  },
+  "sidebar": {
+    "online": "онлайн",
+    "thinking": "думає..."
   },
   "common": {
     "loading": "Завантаження...",

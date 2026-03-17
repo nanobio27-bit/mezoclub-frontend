@@ -73,13 +73,14 @@ export default function ClientsPage() {
 
       {/* Search */}
       <div className="relative">
-        <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+        <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
         <input
           type="text"
           placeholder={t('clients_page.search_placeholder')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full bg-card border border-border rounded-lg pl-10 pr-4 py-2.5 text-text placeholder:text-muted focus:outline-none focus:border-gold transition-colors"
+          className="w-full bg-card border border-border rounded-lg pr-4 py-2.5 text-text placeholder:text-muted focus:outline-none focus:border-gold transition-colors"
+          style={{ paddingLeft: '2.5rem' }}
         />
       </div>
 

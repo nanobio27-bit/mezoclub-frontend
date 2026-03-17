@@ -331,7 +331,7 @@ export default function KpiPage() {
       </div>
 
       {/* KPI metric cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 auto-rows-fr">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 auto-rows-fr">
         {metrics.map((m, i) => (
           <MetricCard
             key={m.label}

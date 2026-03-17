@@ -104,7 +104,9 @@
     "stepConfirm": "Подтверждение",
     "submitting": "Оформление...",
     "submit": "Оформить заказ",
-    "clientFallback": "Клиент #{{id}}"
+    "clientFallback": "Клиент #{{id}}",
+    "discount": "Скидка",
+    "subtotal": "Подитог без скидки"
   },
   "gincoin": {
     "title": "Мой Кувшин",
@@ -248,6 +250,10 @@
     "metricMeetings": "Встречи",
     "metricSeminars": "Семинары",
     "metricLeads": "Лиды"
+  },
+  "sidebar": {
+    "online": "онлайн",
+    "thinking": "думает..."
   },
   "common": {
     "loading": "Загрузка...",

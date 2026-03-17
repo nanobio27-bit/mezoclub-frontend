@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import { Search, Plus, Trash2, ArrowLeft, ArrowRight, Check, ShoppingCart } from 'lucide-react';
+import { Search, Plus, Trash2, ArrowLeft, ArrowRight, Check, ShoppingCart, Percent } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/client';
 import { useDebounce } from '../hooks/useDebounce';
@@ -31,6 +31,7 @@ interface Product {
 interface CartItem {
   product: Product;
   quantity: number;
+  discountPercent: number;
 }
 
 export default function CreateOrderPage() {
@@ -50,6 +51,7 @@ export default function CreateOrderPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [quantities, setQuantities] = useState<Record<number, number>>({});
+  const [manualDiscount, setManualDiscount] = useState<number>(0);
   const debouncedProductSearch = useDebounce(productSearch, 300);
 
   // Step 3: Submit
@@ -105,7 +107,7 @@ export default function CreateOrderPage() {
         )
       );
     } else {
-      setCart([...cart, { product, quantity: qty }]);
+      setCart([...cart, { product, quantity: qty, discountPercent: manualDiscount }]);
     }
     setQuantities({ ...quantities, [product.id]: 1 });
   };
@@ -114,7 +116,33 @@ export default function CreateOrderPage() {
     setCart(cart.filter((item) => item.product.id !== productId));
   };
 
-  const orderTotal = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+  const updateCartDiscount = (productId: number, discount: number) => {
+    setCart(
+      cart.map((item) =>
+        item.product.id === productId
+          ? { ...item, discountPercent: Math.min(100, Math.max(0, discount)) }
+          : item
+      )
+    );
+  };
+
+  // Apply discount per item when manual discount changes (for items that still have the old global discount)
+  useEffect(() => {
+    if (cart.length > 0) {
+      setCart((prev) =>
+        prev.map((item) => ({ ...item, discountPercent: manualDiscount }))
+      );
+    }
+  }, [manualDiscount]);
+
+  const getItemTotal = (item: CartItem) => {
+    const base = item.product.price * item.quantity;
+    return Math.round(base * (1 - item.discountPercent / 100) * 100) / 100;
+  };
+
+  const orderSubtotal = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+  const orderTotal = cart.reduce((sum, item) => sum + getItemTotal(item), 0);
+  const discountAmount = Math.round((orderSubtotal - orderTotal) * 100) / 100;
   const gcClient = Math.floor((orderTotal * 10) / 100);
   const gcManager = Math.floor((orderTotal * 10) / 100);
 
@@ -133,6 +161,7 @@ export default function CreateOrderPage() {
         items: cart.map((item) => ({
           product_id: item.product.id,
           quantity: item.quantity,
+          discount_percent: item.discountPercent || 0,
         })),
       });
       navigate('/orders');
@@ -202,13 +231,14 @@ export default function CreateOrderPage() {
           ) : (
             <>
               <div className="relative">
-                <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+                <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
                 <input
                   type="text"
                   placeholder={t('orders.clientSearch')}
                   value={clientSearch}
                   onChange={(e) => setClientSearch(e.target.value)}
-                  className="w-full bg-bg border border-border rounded-lg pl-10 pr-4 py-2.5 text-text focus:outline-none focus:border-gold"
+                  className="w-full bg-bg border border-border rounded-lg pr-4 py-2.5 text-text focus:outline-none focus:border-gold"
+                  style={{ paddingLeft: '2.5rem' }}
                 />
               </div>
               {clients.length > 0 && (
@@ -238,14 +268,37 @@ export default function CreateOrderPage() {
       {step === 2 && (
         <div className="space-y-4">
           <div className="relative">
-            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
             <input
               type="text"
               placeholder={t('orders.productSearch')}
               value={productSearch}
               onChange={(e) => setProductSearch(e.target.value)}
-              className="w-full bg-bg border border-border rounded-lg pl-10 pr-4 py-2.5 text-text focus:outline-none focus:border-gold"
+              className="w-full bg-bg border border-border rounded-lg pr-4 py-2.5 text-text focus:outline-none focus:border-gold"
+              style={{ paddingLeft: '2.5rem' }}
             />
+          </div>
+
+          {/* Manual discount input */}
+          <div className="bg-card rounded-xl border border-border p-4">
+            <div className="flex items-center gap-3">
+              <Percent size={18} className="text-gold shrink-0" />
+              <label className="text-sm font-medium whitespace-nowrap">{t('orders.discount')}:</label>
+              <input
+                type="number"
+                min={0}
+                max={100}
+                value={manualDiscount}
+                onChange={(e) => setManualDiscount(Math.min(100, Math.max(0, Number(e.target.value))))}
+                className="w-20 bg-bg border border-border rounded-lg px-2 py-1.5 text-text text-center text-sm focus:outline-none focus:border-gold"
+              />
+              <span className="text-sm text-muted">%</span>
+              {manualDiscount > 0 && (
+                <span className="text-xs text-gold ml-auto">
+                  -{formatNumber(discountAmount)} ₴
+                </span>
+              )}
+            </div>
           </div>
 
           {products.length > 0 && (
@@ -285,12 +338,13 @@ export default function CreateOrderPage() {
                 <span className="font-bold text-sm">{t('orders.cart')}</span>
               </div>
               <div className="overflow-x-auto">
-                <table className="w-full text-sm min-w-[500px]">
+                <table className="w-full text-sm min-w-[600px]">
                   <thead>
                   <tr className="border-b border-border">
                     <th className="text-xs text-muted font-normal uppercase text-left px-4 py-2">{t('orders.product')}</th>
                     <th className="text-xs text-muted font-normal uppercase text-right px-4 py-2">{t('orders.price')}</th>
                     <th className="text-xs text-muted font-normal uppercase text-center px-4 py-2">{t('orders.quantity')}</th>
+                    <th className="text-xs text-muted font-normal uppercase text-center px-4 py-2">{t('orders.discount')}</th>
                     <th className="text-xs text-muted font-normal uppercase text-right px-4 py-2">{t('orders.total')}</th>
                     <th className="px-4 py-2"></th>
                   </tr>
@@ -304,8 +358,19 @@ export default function CreateOrderPage() {
                       <td className="px-4 py-2">{item.product.name}</td>
                       <td className="px-4 py-2 text-right">{formatNumber(item.product.price)}</td>
                       <td className="px-4 py-2 text-center">{item.quantity}</td>
+                      <td className="px-4 py-2 text-center">
+                        <input
+                          type="number"
+                          min={0}
+                          max={100}
+                          value={item.discountPercent}
+                          onChange={(e) => updateCartDiscount(item.product.id, Number(e.target.value))}
+                          className="w-14 bg-bg border border-border rounded px-1 py-0.5 text-text text-center text-xs focus:outline-none focus:border-gold"
+                        />
+                        <span className="text-xs text-muted ml-0.5">%</span>
+                      </td>
                       <td className="px-4 py-2 text-right font-medium">
-                        {formatNumber(item.product.price * item.quantity)}
+                        {formatNumber(getItemTotal(item))}
                       </td>
                       <td className="px-4 py-2 text-right">
                         <button
@@ -320,9 +385,23 @@ export default function CreateOrderPage() {
                   </tbody>
                 </table>
               </div>
-              <div className="px-4 py-3 border-t border-border text-right">
-                <span className="text-muted text-sm">{t('orders.total')}: </span>
-                <span className="text-gold font-bold text-lg">{formatNumber(orderTotal)} ₴</span>
+              <div className="px-4 py-3 border-t border-border">
+                {discountAmount > 0 && (
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="text-muted">{t('orders.subtotal')}:</span>
+                    <span className="text-muted">{formatNumber(orderSubtotal)} ₴</span>
+                  </div>
+                )}
+                {discountAmount > 0 && (
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="text-muted">{t('orders.discount')} ({manualDiscount}%):</span>
+                    <span className="text-error">-{formatNumber(discountAmount)} ₴</span>
+                  </div>
+                )}
+                <div className="flex justify-between">
+                  <span className="text-muted text-sm">{t('orders.total')}:</span>
+                  <span className="text-gold font-bold text-lg">{formatNumber(orderTotal)} ₴</span>
+                </div>
               </div>
             </div>
           )}
@@ -353,14 +432,33 @@ export default function CreateOrderPage() {
               >
                 <div>
                   <p className="text-sm font-medium">{item.product.name}</p>
-                  <p className="text-xs text-muted">{item.quantity} x {formatNumber(item.product.price)} ₴</p>
+                  <p className="text-xs text-muted">
+                    {item.quantity} x {formatNumber(item.product.price)} ₴
+                    {item.discountPercent > 0 && (
+                      <span className="text-gold ml-1">(-{item.discountPercent}%)</span>
+                    )}
+                  </p>
                 </div>
-                <p className="text-sm font-medium">{formatNumber(item.product.price * item.quantity)} ₴</p>
+                <p className="text-sm font-medium">{formatNumber(getItemTotal(item))} ₴</p>
               </div>
             ))}
-            <div className="px-4 py-3 border-t border-border flex justify-between">
-              <span className="font-bold">{t('orders.total')}</span>
-              <span className="text-gold font-bold">{formatNumber(orderTotal)} ₴</span>
+            <div className="px-4 py-3 border-t border-border">
+              {discountAmount > 0 && (
+                <div className="flex justify-between text-sm mb-1">
+                  <span className="text-muted">{t('orders.subtotal')}:</span>
+                  <span className="text-muted">{formatNumber(orderSubtotal)} ₴</span>
+                </div>
+              )}
+              {discountAmount > 0 && (
+                <div className="flex justify-between text-sm mb-1">
+                  <span className="text-muted">{t('orders.discount')}:</span>
+                  <span className="text-error">-{formatNumber(discountAmount)} ₴</span>
+                </div>
+              )}
+              <div className="flex justify-between">
+                <span className="font-bold">{t('orders.total')}</span>
+                <span className="text-gold font-bold">{formatNumber(orderTotal)} ₴</span>
+              </div>
             </div>
           </div>
 

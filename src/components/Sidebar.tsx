@@ -33,11 +33,15 @@ const menuItems = [
 ];
 
 export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { logout, user } = useAuthStore();
   const userRole = user?.role || 'manager';
 
   const visibleItems = menuItems.filter((item) => item.roles.includes(userRole));
+
+  // Use i18n.language as key on the nav element to force React to re-render
+  // all menu labels when the language changes
+  const lang = i18n.language;
 
   return (
     <motion.aside
@@ -92,8 +96,8 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
         </button>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 space-y-1 overflow-y-auto" style={{ paddingLeft: 8, paddingRight: 8 }}>
+      {/* Navigation — key={lang} forces full re-render on language change */}
+      <nav key={lang} className="flex-1 space-y-1 overflow-y-auto" style={{ paddingLeft: 8, paddingRight: 8 }}>
         {visibleItems.map((item) => (
           <NavLink
             key={item.key}
@@ -139,12 +143,12 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
             <div className="flex items-center gap-2">
               <div className="ai-dot-online" />
               <span className="text-sm text-text">Rocco</span>
-              <span className="text-[10px] text-muted ml-auto">онлайн</span>
+              <span className="text-[10px] text-muted ml-auto">{t('sidebar.online', { defaultValue: lang === 'uk' ? 'онлайн' : 'онлайн' })}</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="ai-dot-thinking" />
               <span className="text-sm text-text">Teya</span>
-              <span className="text-[10px] text-muted ml-auto">думає...</span>
+              <span className="text-[10px] text-muted ml-auto">{t('sidebar.thinking', { defaultValue: lang === 'uk' ? 'думає...' : 'думает...' })}</span>
             </div>
           </div>
         </div>
